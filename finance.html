@@ -10,8 +10,26 @@
 @media(max-width:780px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}}@media(max-width:420px){.wrap{padding:20px 12px 40px}.card{padding:14px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.grid{gap:9px}}
 </style>
 </head>
-<body><main class="wrap">
-<header class="top"><div><div class="eyebrow">Personal finance</div><h1>Finance Dashboard</h1><p class="sub">Pusat data keuangan pribadi: aset, utang, pemasukan, pengeluaran, dan target.</p></div><span class="pill">PRIVATE ON THIS DEVICE</span></header>
+<body><style>
+#authGate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,10,20,.97);backdrop-filter:blur(8px)}
+#authGate .auth-card{width:min(100%,430px);background:#121c2e;border:1px solid #26364e;border-radius:18px;padding:24px;color:#edf4ff;box-shadow:0 24px 80px #0008}
+#authGate h2{margin:0 0 8px;font-size:24px}#authGate p{color:#9aabc4;font-size:13px}
+#authGate label{display:block;margin:12px 0 6px;color:#9aabc4;font-size:12px}
+#authGate input{width:100%;box-sizing:border-box;border:1px solid #26364e;background:#0b1424;color:#edf4ff;border-radius:10px;padding:12px}
+#authGate .auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+#authGate button{border:0;border-radius:10px;background:#5eead4;color:#06201d;padding:11px 14px;font-weight:800;cursor:pointer}
+#authGate button.secondary{background:#23344d;color:#edf4ff;border:1px solid #26364e}
+#authStatus{min-height:20px;margin-top:12px;color:#f5dca0;font-size:13px}
+#cloudBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+</style>
+<div id="authGate"><div class="auth-card">
+<div style="color:#5eead4;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:800">Finance Dashboard</div>
+<h2>Login keuangan pribadi</h2><p>Gunakan akun yang sama di laptop dan HP agar catatan tersimpan di cloud.</p>
+<form id="authForm"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" required placeholder="nama@email.com">
+<label for="authPassword">Kata sandi</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter">
+<div class="auth-actions"><button type="submit" id="loginBtn">Login</button><button type="button" class="secondary" id="signupBtn">Buat akun</button></div></form>
+<div id="authStatus" role="status"></div></div></div><main class="wrap">
+<header class="top"><div><div class="eyebrow">Personal finance</div><h1>Finance Dashboard</h1><p class="sub">Pusat data keuangan pribadi: aset, utang, pemasukan, pengeluaran, dan target.</p></div><div id="cloudBar"><span class="pill" id="cloudStatus">Cloud belum terhubung</span><button class="secondary" id="logoutBtn" type="button">Logout</button></div></header>
 <div class="notice"><strong>Privasi:</strong> angka awal sengaja kosong. Data yang kamu masukkan disimpan di penyimpanan browser perangkat ini, bukan dikirim ke server. Jangan gunakan perangkat bersama; data lokal tidak otomatis tersinkron ke perangkat lain.</div>
 <section class="grid" aria-label="Ringkasan">
 <div class="card"><div class="metric-label">Total aset tercatat</div><div class="metric" id="totalAssets">Rp0</div><div class="metric-note">Jumlah semua aset yang dimasukkan</div></div>
@@ -53,14 +71,68 @@
 </div><div class="actions"><button type="submit">Tambah transaksi</button><button class="secondary" id="exportBtn" type="button">Ekspor cadangan JSON</button><button class="secondary" id="csvBtn" type="button">Ekspor transaksi CSV</button><button class="secondary" id="importBtn" type="button">Impor cadangan JSON</button><input id="importFile" type="file" accept="application/json,.json" hidden></div></form>
 <div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Nominal</th><th>Catatan</th><th></th></tr></thead><tbody id="txRows"></tbody></table></div><div id="txEmpty" class="empty">Belum ada transaksi yang dicatat.</div></section>
 <div class="actions"><button class="danger" id="resetBtn" type="button">Hapus semua data lokal</button></div>
-<footer class="footer">Finance Dashboard • Versi awal • Data disimpan menggunakan localStorage browser. Ekspor cadangan secara berkala. Menghapus data browser dapat menghapus catatan ini. Dashboard ini alat pencatatan sederhana, bukan aplikasi bank atau penasihat investasi.</footer>
+<footer class="footer">Finance Dashboard • Sinkronisasi cloud Supabase. Gunakan akun yang sama di setiap perangkat dan ekspor cadangan secara berkala. Dashboard ini alat pencatatan sederhana, bukan aplikasi bank atau penasihat investasi.</footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let currentUser=null;
+function setAuthStatus(message){document.getElementById('authStatus').textContent=message}
+function setCloudStatus(message){document.getElementById('cloudStatus').textContent=message}
+async function authenticate(mode){
+ const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;
+ if(!email||!password){setAuthStatus('Isi email dan kata sandi terlebih dahulu.');return}
+ const button=document.getElementById(mode==='login'?'loginBtn':'signupBtn');button.disabled=true;
+ setAuthStatus(mode==='login'?'Sedang login…':'Sedang membuat akun…');
+ try{
+  const result=mode==='login'?await supabaseClient.auth.signInWithPassword({email,password}):await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:'https://mraffiramadhn.github.io/main/finance.html'}});
+  if(result.error)throw result.error;
+  if(mode==='signup'&&!result.data.session){setAuthStatus('Akun dibuat. Periksa email untuk konfirmasi, lalu login setelah konfirmasi.');return}
+  currentUser=result.data.user;if(currentUser)await startCloudSession();
+ }catch(error){setAuthStatus(error.message||'Login gagal. Periksa email dan kata sandi.')}
+ finally{button.disabled=false}
+}
+document.getElementById('authForm').addEventListener('submit',e=>{e.preventDefault();authenticate('login')});
+document.getElementById('signupBtn').addEventListener('click',()=>authenticate('signup'));
+document.getElementById('logoutBtn').addEventListener('click',async()=>{
+ await supabaseClient.auth.signOut();currentUser=null;document.getElementById('authGate').style.display='flex';
+ setAuthStatus('Kamu sudah logout. Login kembali untuk membuka data cloud.');setCloudStatus('Tidak terhubung');
+});
+async function writeCloudSnapshot(){
+ if(!currentUser)return;
+ const snapshot=JSON.parse(JSON.stringify(state));
+ const {error}=await supabaseClient.from('finance_snapshots').upsert({user_id:currentUser.id,payload:snapshot,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ if(error){setCloudStatus('Gagal menyimpan cloud');throw error}
+ setCloudStatus('Tersimpan di cloud • '+currentUser.email);
+}
+async function startCloudSession(){
+ if(!currentUser)return;setAuthStatus('Memuat data cloud…');setCloudStatus('Memuat cloud…');
+ try{
+  const {data,error}=await supabaseClient.from('finance_snapshots').select('payload').eq('user_id',currentUser.id).maybeSingle();
+  if(error)throw error;
+  if(data&&data.payload){
+   const p=data.payload;if(!p||!Array.isArray(p.assets)||!Array.isArray(p.transactions))throw new Error('Format data cloud tidak valid.');
+   state={assets:p.assets,liabilities:Array.isArray(p.liabilities)?p.liabilities:[],transactions:p.transactions,goal:p.goal||{name:'Target tabungan',target:0,current:0}};
+   localStorage.setItem(KEY,JSON.stringify(state));
+  }else{await writeCloudSnapshot()}
+  render();document.getElementById('authGate').style.display='none';setAuthStatus('');setCloudStatus('Tersinkron • '+currentUser.email);
+ }catch(error){setAuthStatus('Gagal memuat cloud: '+(error.message||'periksa pengaturan Supabase'));setCloudStatus('Sinkronisasi gagal')}
+}
+supabaseClient.auth.getSession().then(({data,error})=>{
+ if(error){setAuthStatus(error.message);return}
+ if(data.session){currentUser=data.session.user;startCloudSession()}
+});
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+ if(event==='SIGNED_OUT'){currentUser=null;document.getElementById('authGate').style.display='flex'}
+});
+
 const KEY='rama-finance-dashboard-v1';
 const emptyState={assets:[],liabilities:[],transactions:[],goal:{name:'Target tabungan',target:0,current:0}};
 let state=load();
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.assets)&&Array.isArray(x.transactions)){if(!Array.isArray(x.liabilities))x.liabilities=[];if(!x.goal)x.goal={name:'Target tabungan',target:0,current:0};return x}}catch(e){}return structuredClone(emptyState)}
-function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render();if(currentUser)writeCloudSnapshot().catch(error=>console.error('Cloud save failed:',error))}
 function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function rupiah(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
