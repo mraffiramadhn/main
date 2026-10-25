@@ -58,7 +58,7 @@ function todayKeyForCalendar(){return today()}\nasync function loadState(){const
 state.weeks=calendarWeeks.map(cw=>{const existing=state.weeks.find(w=>w.id===cw.id);return existing?{...cw,...existing,startDate:cw.startDate,endDate:cw.endDate}:{...cw}});
 state.students=state.students.map(s=>({...s,paid:{...(s.paid||{})}}));
 const current=calendarWeeks.filter(w=>w.startDate<=todayKeyForCalendar()).slice(-1)[0];
-if(!selectedWeek||!state.weeks.some(w=>w.id===selectedWeek))selectedWeek=current?.id||state.weeks[0]?.id||null;
+selectedWeek=current?.id||state.weeks[0]?.id||null;
 loaded=true;render()}
 async function persist(){if(!isEditor){alert('Akses edit hanya untuk bendahara yang sudah login.');return false}const payload=normalize(state);const {error}=await sb.from('treasury_state').upsert({id:true,payload,updated_at:new Date().toISOString()},{onConflict:'id'});if(error){console.error(error);alert('Gagal menyimpan: '+error.message);return false}$('lastUpdated').textContent='Terakhir diperbarui: '+new Date().toLocaleString('id-ID');render();return true}
 async function checkEditor(user){if(!user)return false;const {data,error}=await sb.from('treasury_editors').select('user_id').eq('user_id',user.id).maybeSingle();if(error){console.warn(error);return false}return !!data}
