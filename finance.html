@@ -37,6 +37,13 @@
 <div class="progress"><div id="goalBar"></div></div><div id="goalText" class="small">Isi target dan jumlah yang sudah terkumpul untuk melihat progres.</div>
 <hr style="border:0;border-top:1px solid var(--line);margin:22px 0"><h2 class="section-title">Ringkasan bulanan</h2><div class="chartbars" id="monthBars"></div><div class="small" style="margin-top:8px">Visualisasi pemasukan dan pengeluaran berdasarkan bulan transaksi.</div></div>
 </section>
+<section class="card" style="margin-top:14px"><h2 class="section-title">Catat kewajiban / utang</h2>
+<form id="debtForm"><div class="form-grid">
+<div class="field"><label for="debtName">Nama kewajiban</label><input id="debtName" maxlength="60" required placeholder="Contoh: pinjaman"></div>
+<div class="field"><label for="debtAmount">Sisa kewajiban (Rp)</label><input id="debtAmount" type="number" min="0" step="1" required placeholder="0"></div>
+<div class="field full"><label for="debtNote">Catatan (opsional)</label><input id="debtNote" maxlength="100" placeholder="Jatuh tempo / keterangan"></div>
+</div><div class="actions"><button type="submit">Simpan kewajiban</button></div></form>
+<div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Kewajiban</th><th>Sisa</th><th>Catatan</th><th></th></tr></thead><tbody id="debtRows"></tbody></table></div><div id="debtEmpty" class="empty">Belum ada kewajiban yang dicatat.</div></section>
 <section class="card" style="margin-top:14px"><h2 class="section-title">Catat transaksi</h2><form id="txForm"><div class="form-grid">
 <div class="field"><label for="txDate">Tanggal</label><input id="txDate" type="date" required></div>
 <div class="field"><label for="txType">Jenis transaksi</label><select id="txType"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div>
