@@ -24,6 +24,8 @@ async function loadLogs(){
  const paymentTxs=txs.filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas'));
  const getStudent=t=>t.student||String(t.note||'').split(' · ')[0]||'—';
  const getWeek=t=>t.week||String(t.note||'').split(' · ').slice(1).join(' · ')||'—';
+ const cleanLabel=v=>String(v||'—').split(': Rp')[0].trim();
+ const displayTime=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});};
  $('transactionRows').innerHTML=paymentTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
   const method=t.account==='bank'?'Rekening':'Tunai';
   const kind=t.mode==='future'?'Pembayaran minggu depan':t.mode==='due'?'Pembayaran tertagih':'Pembayaran kas';
@@ -38,7 +40,7 @@ async function loadLogs(){
   const key=[row.time,row.student,row.week].join('|');
   if(!seen.has(key)){inputRows.push(row);seen.add(key)}
  });
- $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.admin||'Administrator')+'</td><td>'+esc(p.time?(new Date(p.time).toLocaleString('id-ID')):'—')+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
+ $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.admin||'Administrator')+'</td><td>'+esc(displayTime(p.time))+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
  $('rows').innerHTML=(audit.data||[]).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';
  status('logStatus',paymentTxs.length+' transaksi pembayaran · '+inputRows.length+' baris input kas · '+(audit.data||[]).length+' log administratif');
 }
