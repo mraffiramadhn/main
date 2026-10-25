@@ -22,14 +22,14 @@ async function loadLogs(){
  if(stateResult.error){status('logStatus','Tidak dapat membaca data kas: '+stateResult.error.message);return}
  const payload=stateResult.data?.payload||{},txs=Array.isArray(payload.transactions)?payload.transactions:[],payments=Array.isArray(payload.paymentLogs)?payload.paymentLogs:[];
  const paymentTxs=txs.filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas'));
- const getStudent=t=>t.student||String(t.note||'').split(' · ')[0]||'—';
+ const getStudent=t=>{const direct=String(t.student||'').trim();if(direct)return direct;const legacy=String(t.note||'').split(' · ')[0].trim();return legacy&&!/^(pembayaran tertagih|pembayaran minggu depan|pembayaran kas)$/i.test(legacy)?legacy:'Nama tidak tersedia';};
  const getWeek=t=>t.week||String(t.note||'').split(' · ').slice(1).join(' · ')||'—';
  const cleanLabel=v=>String(v||'—').split(': Rp')[0].trim();
  const displayTime=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});};
  $('transactionRows').innerHTML=paymentTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
   const method=t.account==='bank'?'Rekening':'Tunai';
   const kind=t.mode==='future'?'Pembayaran minggu depan':t.mode==='due'?'Pembayaran tertagih':'Pembayaran kas';
-  return '<tr><td>'+esc(t.admin||'Administrator')+'</td><td>d</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(t.time?new Date(t.time).toLocaleString('id-ID'):t.date||'—')+'</td><td>'+esc(getStudent(t)+' - '+kind+' - '+getWeek(t)+' - '+method)+'</td></tr>';
+  return '<tr><td>'+esc(t.admin||'Administrator')+'</td><td>D</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(displayTime(t.time||t.date))+'</td><td>'+esc(getStudent(t)+' - '+kind+' - '+cleanLabel(getWeek(t))+' - '+method)+'</td></tr>';
  }).join('')||'<tr><td colspan="5">Belum ada transaksi pembayaran kas.</td></tr>';
  // Build input logs from the transaction records too, so existing payment transactions still appear even if paymentLogs is missing.
  const inputRows=[];
