@@ -39,7 +39,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const today=()=>new Date().toLocaleDateString('en-CA');
 function setStatus(id,msg){$(id).textContent=msg}
 function normalize(p){return {...structuredClone(DEFAULT),...(p||{}),students:Array.isArray(p?.students)?p.students:[],transactions:Array.isArray(p?.transactions)?p.transactions:[],weeks:Array.isArray(p?.weeks)?p.weeks:[]}}
-function todayKeyForCalendar(){return today()}\nasync function loadState(){const {data,error}=await sb.from('treasury_state').select('payload,updated_at').eq('id',true).maybeSingle();if(error){$('connection').textContent='Gagal memuat data';console.error(error);return}if(data){state=normalize(data.payload);$('lastUpdated').textContent='Terakhir diperbarui: '+new Date(data.updated_at).toLocaleString('id-ID')}else{state=structuredClone(DEFAULT)}const calendarWeeks=[
+function todayKeyForCalendar(){return today()}
+async function loadState(){const {data,error}=await sb.from('treasury_state').select('payload,updated_at').eq('id',true).maybeSingle();if(error){$('connection').textContent='Gagal memuat data';console.error(error);return}if(data){state=normalize(data.payload);$('lastUpdated').textContent='Terakhir diperbarui: '+new Date(data.updated_at).toLocaleString('id-ID')}else{state=structuredClone(DEFAULT)}const calendarWeeks=[
 {id:'sep-3',label:'September - 3',startDate:'2026-09-14',endDate:'2026-09-18'},
 {id:'sep-4',label:'September - 4',startDate:'2026-09-21',endDate:'2026-09-25'},
 {id:'sep-5',label:'September - 5',startDate:'2026-09-28',endDate:'2026-10-02'},
