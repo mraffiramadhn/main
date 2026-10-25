@@ -81,7 +81,7 @@ $('exportJson').onclick=()=>download(JSON.stringify(state,null,2),'treasury-back
 function download(content,name,type){const blob=new Blob(['\ufeff',content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 $('resetData').onclick=async()=>{if(!confirm('Yakin reset semua transaksi, siswa, dan periode? Tindakan ini tidak dapat dibatalkan.'))return;state=structuredClone(DEFAULT);selectedWeek=null;if(await persist())setStatus('adminStatus','Data berhasil direset.')};
 $('txDate').value=today();
-sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;updateAccess()}else if(session?.user){currentUser=session.user;isEditor=await checkEditor(currentUser);updateAccess()}});
-(async()=>{const {data}=await sb.auth.getSession();if(data.session){currentUser=data.session.user;isEditor=await checkEditor(currentUser)}await loadState();updateAccess()})();
+sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;updateAccess()}else if(session?.user){currentUser=session.user;queueMicrotask(async()=>{try{currentUser=session.user;isEditor=await checkEditor(currentUser);updateAccess()}catch(e){console.error(e);setStatus('authStatus','Gagal memeriksa izin: '+(e?.message||String(e)))}})}});
+(async()=>{try{setStatus('authStatus','Menghubungkan ke Supabase…');const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session){currentUser=data.session.user;isEditor=await checkEditor(currentUser)}await loadState();updateAccess();if(isEditor)setStatus('authStatus','Login bendahara aktif.')}catch(e){console.error(e);$('connection').textContent='Koneksi gagal';setStatus('authStatus','Gagal memuat: '+(e?.message||String(e)))}})();
 </script>
 </body></html>
