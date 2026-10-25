@@ -12,7 +12,36 @@
 const sb=window.supabase.createClient('https://ynrdhuhykzsuxsbauvkd.supabase.co','sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA');const $=id=>document.getElementById(id);let currentUser=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function status(id,msg){$(id).textContent=msg}
-async function loadLogs(){status('logStatus','Memuat log…');const [audit,stateResult]=await Promise.all([sb.from('treasury_audit_log').select('id,actor_email,actor_role,action,details,created_at').order('created_at',{ascending:false}).limit(250),sb.from('treasury_state').select('payload').eq('id',true).maybeSingle()]);if(audit.error){status('logStatus','Tidak dapat membaca log: '+audit.error.message);return}const payload=stateResult.data?.payload||{},txs=Array.isArray(payload.transactions)?payload.transactions:[],payments=Array.isArray(payload.paymentLogs)?payload.paymentLogs:[];$('transactionRows').innerHTML=txs.slice().filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas')).sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>'<tr><td>'+esc(t.admin||'Administrator')+'</td><td>d</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(t.time?new Date(t.time).toLocaleString('id-ID'):t.date||'—')+'</td><td>'+esc([t.student,t.mode==='future'?'Pembayaran minggu depan':t.mode==='due'?'Pembayaran tertagih':'Pembayaran kas',t.week,'Payment'].filter(Boolean).join(' - '))+'</td></tr>').join('')||'<tr><td colspan="5">Belum ada transaksi pembayaran kas.</td></tr>';$('paymentRows').innerHTML=payments.slice().sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).flatMap(p=>(p.weeks||[]).map(w=>'<tr><td>'+esc(p.admin||'Administrator')+'</td><td>'+esc(new Date(p.time).toLocaleString('id-ID'))+'</td><td>'+esc(w)+'</td><td>'+esc(p.student||'—')+'</td></tr>')).join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';$('rows').innerHTML=(audit.data||[]).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';status('logStatus',(txs.length)+' transaksi tersimpan · '+payments.length+' input kas · '+(audit.data||[]).length+' log administratif')}
+async function loadLogs(){
+ status('logStatus','Memuat log…');
+ const [audit,stateResult]=await Promise.all([
+  sb.from('treasury_audit_log').select('id,actor_email,actor_role,action,details,created_at').order('created_at',{ascending:false}).limit(250),
+  sb.from('treasury_state').select('payload').eq('id',true).maybeSingle()
+ ]);
+ if(audit.error){status('logStatus','Tidak dapat membaca log: '+audit.error.message);return}
+ if(stateResult.error){status('logStatus','Tidak dapat membaca data kas: '+stateResult.error.message);return}
+ const payload=stateResult.data?.payload||{},txs=Array.isArray(payload.transactions)?payload.transactions:[],payments=Array.isArray(payload.paymentLogs)?payload.paymentLogs:[];
+ const paymentTxs=txs.filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas'));
+ const getStudent=t=>t.student||String(t.note||'').split(' · ')[0]||'—';
+ const getWeek=t=>t.week||String(t.note||'').split(' · ').slice(1).join(' · ')||'—';
+ $('transactionRows').innerHTML=paymentTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
+  const method=t.account==='bank'?'Rekening':'Tunai';
+  const kind=t.mode==='future'?'Pembayaran minggu depan':t.mode==='due'?'Pembayaran tertagih':'Pembayaran kas';
+  return '<tr><td>'+esc(t.admin||'Administrator')+'</td><td>d</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(t.time?new Date(t.time).toLocaleString('id-ID'):t.date||'—')+'</td><td>'+esc(getStudent(t)+' - '+kind+' - '+getWeek(t)+' - '+method)+'</td></tr>';
+ }).join('')||'<tr><td colspan="5">Belum ada transaksi pembayaran kas.</td></tr>';
+ // Build input logs from the transaction records too, so existing payment transactions still appear even if paymentLogs is missing.
+ const inputRows=[];
+ payments.forEach(p=>(p.weeks||[]).forEach(w=>inputRows.push({admin:p.admin,time:p.time,week:w,student:p.student,id:p.id})));
+ const seen=new Set(inputRows.map(p=>[p.time,p.student,p.week].join('|')));
+ paymentTxs.forEach(t=>{
+  const row={admin:t.admin,time:t.time||t.date,week:getWeek(t),student:getStudent(t)};
+  const key=[row.time,row.student,row.week].join('|');
+  if(!seen.has(key)){inputRows.push(row);seen.add(key)}
+ });
+ $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.admin||'Administrator')+'</td><td>'+esc(p.time?(new Date(p.time).toLocaleString('id-ID')):'—')+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
+ $('rows').innerHTML=(audit.data||[]).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';
+ status('logStatus',paymentTxs.length+' transaksi pembayaran · '+inputRows.length+' baris input kas · '+(audit.data||[]).length+' log administratif');
+}
 async function showIfAllowed(){if(!currentUser)return;const {data,error}=await sb.from('treasury_roles').select('role').eq('user_id',currentUser.id).maybeSingle();if(error||!data||!['admin','superadmin'].includes(data.role)){status('loginStatus','Akun ini tidak memiliki izin melihat log.');await sb.auth.signOut();currentUser=null;return} $('loginPanel').classList.add('hidden');$('logPanel').classList.remove('hidden');$('logout').classList.remove('hidden');await loadLogs()}
 $('login').onclick=async()=>{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){status('loginStatus','Login gagal: '+error.message);return}currentUser=data.user;await showIfAllowed()};
 $('refresh').onclick=loadLogs;$('logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
