@@ -1,104 +1,30 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <meta name="description" content="Rama Digital Ecosystem — ruang digital untuk profil, administrasi, dan pengelolaan keuangan.">
-  <title>Rama Digital Ecosystem</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0b1220;
-      --panel: rgba(20, 31, 51, .84);
-      --line: rgba(190, 205, 230, .15);
-      --text: #f3f6fc;
-      --muted: #aebbd0;
-      --accent: #8bb8ff;
-      --accent2: #b9a5ff;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0; min-height: 100vh; color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(ellipse at 15% 0%, rgba(79, 120, 210, .24), transparent 38rem),
-        radial-gradient(ellipse at 90% 25%, rgba(135, 95, 210, .16), transparent 35rem),
-        var(--bg);
-    }
-    .wrap { width: min(1080px, calc(100% - 36px)); margin: 0 auto; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; gap: 16px; }
-    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.02em; }
-    .mark {
-      width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center;
-      background: linear-gradient(135deg, #8bb8ff, #b9a5ff); color: #101827; font-weight: 900;
-    }
-    .top-label { color: var(--muted); font-size: .9rem; }
-    main { padding: 48px 0 70px; }
-    .eyebrow { color: var(--accent); font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; }
-    h1 { font-size: clamp(2.5rem, 7vw, 5.3rem); line-height: .99; letter-spacing: -.065em; max-width: 850px; margin: 18px 0; }
-    h1 span { background: linear-gradient(100deg, #d4e4ff, #bcaaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .intro { color: var(--muted); font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.8; max-width: 650px; margin: 0 0 32px; }
-    .status { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 999px; padding: 9px 13px; color: #dce7f8; font-size: .88rem; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #86d6b0; box-shadow: 0 0 12px #86d6b077; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 58px; }
-    .card { border: 1px solid var(--line); border-radius: 22px; padding: 24px; background: var(--panel); backdrop-filter: blur(10px); min-height: 235px; display: flex; flex-direction: column; }
-    .icon { width: 45px; height: 45px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 14px; font-size: 1.25rem; margin-bottom: 22px; background: rgba(255,255,255,.045); }
-    h2 { margin: 0 0 9px; font-size: 1.2rem; letter-spacing: -.025em; }
-    .card p { margin: 0 0 22px; color: var(--muted); font-size: .95rem; line-height: 1.65; }
-    .tag { margin-top: auto; color: #d2ddf0; font-size: .82rem; }
-    .tag::before { content: "↗ "; color: var(--accent); }
-    .note { margin-top: 22px; padding: 16px 18px; border-radius: 16px; border: 1px dashed var(--line); color: var(--muted); line-height: 1.65; font-size: .9rem; }
-    footer { border-top: 1px solid var(--line); padding: 23px 0 30px; color: var(--muted); font-size: .86rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    @media (max-width: 760px) {
-      header { padding: 18px 0; }
-      .top-label { display: none; }
-      main { padding-top: 34px; }
-      .grid { grid-template-columns: 1fr; margin-top: 38px; }
-      .card { min-height: auto; }
-      .icon { margin-bottom: 16px; }
-    }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#08111f">
+<meta name="description" content="Website personal Muhammad Raffi Ramadhan — profil, minat, dan perjalanan bertumbuh.">
+<title>Muhammad Raffi Ramadhan — Personal Website</title>
+<style>
+:root{color-scheme:dark;--bg:#08111f;--panel:#101d30;--text:#edf4ff;--muted:#a8b7cc;--blue:#79b8ff;--cyan:#80e0df;--line:rgba(183,207,239,.16)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:84px}body{margin:0;background:radial-gradient(ellipse at 80% 0%,rgba(48,105,173,.22),transparent 38%),var(--bg);color:var(--text);font:16px/1.7 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1080px,calc(100% - 36px));margin:auto}
+nav{position:sticky;top:0;z-index:3;background:#08111fe8;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:850;letter-spacing:-.04em}.brand span{color:var(--cyan)}.links{display:flex;gap:22px;color:var(--muted);font-size:.92rem}.links a:hover,.top{color:var(--cyan)}
+.hero{padding:82px 0 78px;display:grid;grid-template-columns:1.3fr .7fr;gap:40px;align-items:center;min-height:520px}.eyebrow,.kicker{color:var(--cyan);font-size:.8rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800}.eyebrow:before{content:"";display:inline-block;width:8px;height:8px;background:var(--cyan);border-radius:50%;margin-right:10px}
+h1{font-size:clamp(2.8rem,7vw,5.4rem);line-height:1.03;letter-spacing:-.065em;margin:18px 0 22px}h1 span{background:linear-gradient(100deg,var(--blue),var(--cyan));color:transparent;background-clip:text}.lead{font-size:1.12rem;color:var(--muted);max-width:610px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-flex;padding:11px 17px;border:1px solid var(--line);border-radius:12px;font-weight:750}.btn.primary{background:var(--blue);color:#08111f;border-color:var(--blue)}.btn:hover{border-color:var(--cyan)}
+.visual{display:grid;place-items:center;position:relative;min-height:300px}.orb{width:min(290px,68vw);aspect-ratio:1;border:1px solid #80e0df55;border-radius:44% 56% 62% 38%/42% 42% 58% 58%;background:linear-gradient(145deg,#79b8ff28,#80e0df0b);display:grid;place-items:center;box-shadow:0 0 80px #4d96e222;transform:rotate(-8deg)}.inner{width:72%;height:72%;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;transform:rotate(8deg)}.monogram{font-size:clamp(3.5rem,9vw,5.5rem);font-weight:900;letter-spacing:-.1em;background:linear-gradient(135deg,#fff,var(--blue),var(--cyan));color:transparent;background-clip:text}.float{position:absolute;padding:9px 13px;border:1px solid var(--line);border-radius:12px;background:#101d30;color:var(--muted);font-size:.84rem}.f1{top:16%;left:0}.f2{right:0;bottom:15%}
+section{padding:68px 0;border-top:1px solid var(--line)}h2{font-size:clamp(2rem,4vw,3rem);line-height:1.1;letter-spacing:-.045em;margin:10px 0 14px}.intro{max-width:660px;color:var(--muted);margin-bottom:28px}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:24px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(145deg,#101d30f0,#0d1828c9)}.card h3{margin:0 0 8px}.card p{color:var(--muted);margin:0}.emoji{font-size:1.7rem;display:block;margin-bottom:14px}.tag{font-size:.78rem;color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:block}.contact{display:flex;align-items:center;justify-content:space-between;gap:24px}.contact p{color:var(--muted);max-width:600px}footer{padding:25px 0 35px;color:var(--muted);font-size:.85rem}.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:740px){.links{gap:12px;font-size:.82rem}.hero{grid-template-columns:1fr;padding:50px 0 55px;gap:10px}.visual{min-height:240px;order:-1}.orb{width:220px}.f1{left:2%}.f2{right:2%}.two,.three{grid-template-columns:1fr}.contact{align-items:flex-start;flex-direction:column}.card{padding:21px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand"><div class="mark">R</div><span>Rama Digital Ecosystem</span></div>
-      <div class="top-label">Personal digital workspace</div>
-    </header>
-    <main>
-      <div class="eyebrow">Satu ruang digital · Banyak kemungkinan</div>
-      <h1>Membangun sistem yang lebih <span>teratur.</span></h1>
-      <p class="intro">Selamat datang di Rama Digital Ecosystem — pusat untuk profil pribadi, administrasi kelas, dan pengelolaan keuangan. Proyek ini dimulai sederhana dan akan dikembangkan bertahap.</p>
-      <div class="status"><span class="dot"></span> Tahap 1 · Halaman utama prototipe</div>
-      <section class="grid" aria-label="Bagian ekosistem digital">
-        <article class="card">
-          <div class="icon" aria-hidden="true">✦</div>
-          <h2>Personal Profile</h2>
-          <p>Profil, perjalanan, minat, dan portofolio pribadi dalam satu halaman.</p>
-          <div class="tag">Direncanakan untuk mraffiramadhan.space</div>
-        </article>
-        <article class="card">
-          <div class="icon" aria-hidden="true">▤</div>
-          <h2>Class Treasury</h2>
-          <p>Rencana dashboard kas kelas, rekap pemasukan dan pengeluaran, serta laporan periode.</p>
-          <div class="tag">Direncanakan untuk treasury.mraffiramadhan.space</div>
-        </article>
-        <article class="card">
-          <div class="icon" aria-hidden="true">◈</div>
-          <h2>Personal Finance</h2>
-          <p>Rencana pencatatan aset, tabungan, arus kas, dan target keuangan pribadi.</p>
-          <div class="tag">Direncanakan untuk finance.mraffiramadhan.space</div>
-        </article>
-      </section>
-      <div class="note"><strong>Catatan keamanan:</strong> Ini masih prototipe tampilan. Jangan masukkan data kas kelas, saldo, nomor rekening, atau informasi pribadi yang sensitif. Fitur login dan pengamanan data belum dibuat.</div>
-    </main>
-    <footer>
-      <span>© <span id="year"></span> Rama Digital Ecosystem</span>
-      <span>Dibangun bertahap, dimulai dari versi sederhana.</span>
-    </footer>
-  </div>
-  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
-</body>
-</html>
+<nav><div class="wrap nav"><a class="brand" href="#home">MRR<span>.</span></a><div class="links"><a href="#about">Tentang</a><a href="#interests">Minat</a><a href="#projects">Proyek</a><a href="#contact">Kontak</a></div></div></nav>
+<main>
+<div class="wrap hero" id="home"><div><div class="eyebrow">Personal website</div><h1>Halo, saya<br><span>Raffi Ramadhan.</span></h1><p class="lead">Seorang pelajar yang senang belajar hal baru, mengeksplorasi ide, dan membangun sesuatu yang bermanfaat—satu langkah dalam satu waktu.</p><div class="actions"><a class="btn primary" href="#about">Kenali saya ↘</a><a class="btn" href="#projects">Lihat proyek</a></div></div><div class="visual" aria-label="Monogram MRR"><div class="orb"><div class="inner"><div class="monogram">MRR</div></div></div><div class="float f1">Curious by nature ✦</div><div class="float f2">Learning in progress ↗</div></div></div>
+<section id="about"><div class="wrap"><div class="kicker">01 / Tentang saya</div><h2>Terus tumbuh,<br>terus mencoba.</h2><p class="intro">Perjalanan tidak harus langsung sempurna. Yang penting, terus belajar dan membuat kemajuan yang berarti.</p><div class="two"><article class="card"><h3>Sedikit tentang saya</h3><p>Saya Muhammad Raffi Ramadhan, seorang pelajar di SMAN 2 Kota Mojokerto. Saya tertarik pada pendidikan, pengelolaan keuangan, teknologi, dan ide-ide yang bisa dikembangkan menjadi proyek nyata.</p></article><article class="card"><h3>Prinsip yang saya pegang</h3><p>Aktif, terus belajar, dan tetap menjaga keseimbangan. Bertumbuh bukan soal melakukan semuanya sekaligus, melainkan memilih langkah yang tepat.</p></article></div></div></section>
+<section id="interests"><div class="wrap"><div class="kicker">02 / Hal yang saya sukai</div><h2>Minat & inspirasi.</h2><p class="intro">Beberapa hal yang membuat saya bersemangat untuk terus mencoba dan belajar.</p><div class="three"><article class="card"><span class="emoji">✈️</span><h3>Traveling</h3><p>Menjelajahi tempat baru, melihat perspektif berbeda, dan mengumpulkan pengalaman.</p></article><article class="card"><span class="emoji">🍳</span><h3>Memasak</h3><p>Mencoba resep, bereksperimen dengan rasa, dan menikmati proses membuat sesuatu.</p></article><article class="card"><span class="emoji">🎧</span><h3>Musik</h3><p>Menemani aktivitas sehari-hari dengan musik dan menemukan suasana baru lewat lagu.</p></article></div></div></section>
+<section id="projects"><div class="wrap"><div class="kicker">03 / Ruang berkarya</div><h2>Proyek & perjalanan.</h2><p class="intro">Tempat untuk mencatat hal yang sedang dipelajari dan proyek yang akan terus berkembang.</p><div class="two"><article class="card"><span class="tag">Digital project</span><h3>Personal website</h3><p>Ruang digital untuk memperkenalkan diri, menyusun ide, dan mendokumentasikan perjalanan.</p></article><article class="card"><span class="tag">Finance & organization</span><h3>Financial dashboard</h3><p>Belajar mengelola data, menyusun pencatatan yang rapi, dan menyajikan informasi agar mudah dipahami.</p></article></div></div></section>
+<section id="contact"><div class="wrap"><div class="card contact"><div><div class="kicker">04 / Kontak</div><h2>Terhubung, bertukar ide.</h2><p>Bagian ini akan dilengkapi dengan tautan kontak atau media sosial resmi setelah siap dipublikasikan.</p></div><a class="btn primary" href="#home">Kembali ke atas ↑</a></div></div></section>
+</main><footer><div class="wrap foot"><span>© <span id="year">2026</span> Muhammad Raffi Ramadhan</span><span>Dibuat dengan rasa ingin tahu dan semangat belajar.</span></div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+</body></html>
