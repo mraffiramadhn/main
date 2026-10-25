@@ -50,7 +50,26 @@ const ps=$('paymentStudent'),prior=ps.value;ps.innerHTML='<option value="">Pilih
 $('paymentRows').innerHTML=students.length?students.map(s=>{const pa=week?paidFor(s,selectedWeek):0,ok=week&&pa>=dueFor(s),remaining=week?Math.max(0,dueFor(s)-pa):dueFor(s);return '<div class="studentrow"><div><strong>'+esc(s.name)+'</strong><div style="margin-top:4px"><span class="tag '+(ok?'paid':'unpaid')+'">'+(ok?'✓ Lunas':'□ Belum lunas')+'</span> <span class="muted" style="font-size:12px">'+(week?esc(week.label)+' · '+rupiah(pa)+'/'+rupiah(dueFor(s)):'Pilih minggu')+'</span><div class="muted" style="font-size:12px">Total tunggakan: '+rupiah(owedFor(s))+'</div></div></div><div style="text-align:right;font-size:12px;color:var(--muted)">'+(remaining?rupiah(remaining)+' tersisa':'Tuntas')+'</div></div>'}).join(''):'<div class="empty">Tambahkan daftar siswa setelah login bendahara.</div>';
 const tx=state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date));let run=Number(state.cash)+Number(state.bank);const sorted=tx.slice().reverse();const bal={};let b=0;sorted.forEach(t=>{b+=(t.type==='income'?1:-1)*Number(t.amount);bal[t.id]=b});$('txRows').innerHTML=tx.map(t=>'<tr><td>'+esc(t.date)+'</td><td><strong>'+esc(t.category)+'</strong><div class="muted">'+esc(t.note||'')+'</div></td><td>'+ (t.account==='bank'?'Rekening':'Tunai')+'</td><td class="'+(t.type==='income'?'income':'expense')+'">'+(t.type==='income'?'+':'−')+rupiah(t.amount)+'</td><td>'+rupiah(bal[t.id]??0)+'</td><td>'+(isEditor?'<button class="danger" data-delete="'+esc(t.id)+'" style="padding:5px 8px">Hapus</button>':'')+'</td></tr>').join('');$('txEmpty').style.display=tx.length?'none':'block';$('txRows').querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=async()=>{if(!confirm('Hapus transaksi ini? Disarankan menambah transaksi koreksi agar riwayat tetap jelas.'))return;state.transactions=state.transactions.filter(t=>t.id!==btn.dataset.delete);await persist()});updateAccess()}
 function uid(){return crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)}
-// Login handlers are installed by the isolated recovery script below.
+$('loginToggle').onclick=()=>{$('loginBox').classList.toggle('open')};
+$('cancelLogin').onclick=()=>$('loginBox').classList.remove('open');
+$('loginBtn').onclick=async()=>{
+ const button=$('loginBtn');button.disabled=true;setStatus('authStatus','Memeriksa akun…');
+ try{
+  const email=$('email').value.trim(),password=$('password').value;
+  if(!email||!password){setStatus('authStatus','Masukkan email dan password terlebih dahulu.');return}
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){setStatus('authStatus','Login gagal: '+error.message);return}
+  currentUser=data.user;
+  isEditor=await checkEditor(currentUser);
+  if(!isEditor){setStatus('authStatus','Akun berhasil login, tetapi belum terdaftar sebagai bendahara.');await sb.auth.signOut();currentUser=null;updateAccess();return}
+  updateAccess();setStatus('authStatus','Login berhasil. Formulir bendahara aktif.');
+  $('loginBox').classList.remove('open');
+  await loadState();
+ }catch(e){setStatus('authStatus','Gagal memuat akses bendahara: '+(e?.message||String(e)))}
+ finally{button.disabled=false}
+};
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();currentUser=null;isEditor=false;updateAccess();setStatus('authStatus','Kamu sudah keluar.')};
+$('addTx').onclick=async()=>
 $('addTx').onclick=async()=>{const amount=Number($('txAmount').value);if(!$('txCategory').value.trim()||!Number.isFinite(amount)||amount<=0){setStatus('txStatus','Isi kategori dan nominal yang valid.');return}const type=$('txType').value,account=$('txAccount').value;if(type==='expense'&&amount>Number(state[account])){setStatus('txStatus','Saldo '+(account==='cash'?'tunai':'rekening')+' tidak cukup. Perbarui saldo aktual atau pilih akun yang benar.');return}state.transactions.push({id:uid(),date:$('txDate').value||today(),type,category:$('txCategory').value.trim(),amount,account,note:$('txNote').value.trim()});state[account]=Number(state[account])+(type==='income'?amount:-amount)if(await persist()){$('txCategory').value='';$('txAmount').value='';$('txNote').value='';setStatus('txStatus','Mutasi tersimpan.')}};
 $('paymentStudent').onchange=updateDebtDisplay;$('payFull').onclick=()=>{const s=state.students.find(x=>x.id===$('paymentStudent').value);if(s)$('paymentAmount').value=owedFor(s)};$('payHalf').onclick=()=>{const s=state.students.find(x=>x.id===$('paymentStudent').value);if(s)$('paymentAmount').value=Math.max(5000,Math.floor((owedFor(s)/2)/5000)*5000)};$('submitPayment').onclick=async()=>{const s=state.students.find(x=>x.id===$('paymentStudent').value);if(!s){setStatus('paymentStatus','Pilih nama siswa terlebih dahulu.');return}if(!state.weeks.length){setStatus('paymentStatus','Tambahkan minggu pembayaran terlebih dahulu.');return}const amount=Number($('paymentAmount').value),owed=owedFor(s),account=$('paymentAccount').value;if(!Number.isInteger(amount)||amount<5000||amount%5000!==0){setStatus('paymentStatus','Nominal harus kelipatan Rp5.000.');return}if(amount>owed){setStatus('paymentStatus','Nominal melebihi kekurangan '+rupiah(owed)+'.');return}const oldPaid=JSON.parse(JSON.stringify(s.paid||{})),tx={id:uid(),date:today(),type:'income',category:'Pembayaran kas — '+s.name,amount,account,note:'Pembayaran kas mingguan'};let remaining=amount;for(const w of state.weeks){if(remaining<=0)break;const current=paidFor(s,w.id),short=Math.max(0,dueFor(s)-current);if(!short)continue;const add=Math.min(short,remaining);s.paid=s.paid||{};s.paid[w.id]=current+add;remaining-=add}state.transactions.push(tx);state[account]=Number(state[account])+amount;if(await persist()){setStatus('paymentStatus','Pembayaran '+rupiah(amount)+' berhasil dicatat untuk '+s.name+'. Saldo '+(account==='cash'?'tunai':'rekening')+' bertambah.');updateDebtDisplay()}else{s.paid=oldPaid;state.transactions=state.transactions.filter(t=>t.id!==tx.id);state[account]-=amount;render()}};
 $('addStudent').onclick=async()=>{const name=$('studentName').value.trim();if(!name){setStatus('rosterStatus','Masukkan nama siswa.');return}if(state.students.some(s=>s.name.toLowerCase()===name.toLowerCase())){setStatus('rosterStatus','Nama tersebut sudah ada.');return}const weeklyAmount=Number($('weeklyAmount').value);if(!Number.isInteger(weeklyAmount)||weeklyAmount<5000||weeklyAmount%5000!==0){setStatus('rosterStatus','Iuran mingguan harus kelipatan Rp5.000.');return}state.students.push({id:uid(),name,weeklyAmount,paid:{}});if(await persist()){$('studentName').value='';setStatus('rosterStatus','Siswa ditambahkan.')}};
@@ -64,34 +83,5 @@ $('resetData').onclick=async()=>{if(!confirm('Yakin reset semua transaksi, siswa
 $('txDate').value=today();
 sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;updateAccess()}else if(session?.user){currentUser=session.user;isEditor=await checkEditor(currentUser);updateAccess()}});
 (async()=>{const {data}=await sb.auth.getSession();if(data.session){currentUser=data.session.user;isEditor=await checkEditor(currentUser)}await loadState();updateAccess()})();
-</script><script>
-(function(){
-  const URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
-  const KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
-  const byId=id=>document.getElementById(id);
-  const show=(msg)=>{const el=byId('authStatus');if(el)el.textContent=msg;};
-  try{
-    if(!window.supabase){show('Komponen login belum termuat. Muat ulang halaman.');return;}
-    const client=window.supabase.createClient(URL,KEY);
-    byId('loginToggle')?.addEventListener('click',()=>byId('loginBox')?.classList.toggle('open'));
-    byId('cancelLogin')?.addEventListener('click',()=>byId('loginBox')?.classList.remove('open'));
-    byId('loginBtn')?.addEventListener('click',async()=>{
-      const button=byId('loginBtn');button.disabled=true;show('Memeriksa akun…');
-      try{
-        const email=(byId('email')?.value||'').trim(),password=byId('password')?.value||'';
-        if(!email||!password){show('Masukkan email dan password terlebih dahulu.');return;}
-        const {data,error}=await client.auth.signInWithPassword({email,password});
-        if(error){show('Login gagal: '+error.message);return;}
-        const {data:grant,error:grantError}=await client.from('treasury_editors').select('user_id').eq('user_id',data.user.id).maybeSingle();
-        if(grantError){show('Login berhasil, tetapi izin bendahara gagal diperiksa: '+grantError.message);return;}
-        if(!grant){show('Akun berhasil login, tetapi belum diberi izin bendahara. Minta admin menambahkan akses.');await client.auth.signOut();return;}
-        currentUser=data.user;isEditor=true;show('Login berhasil. Memuat Treasury…');byId('loginBox')?.classList.remove('open');if(typeof updateAccess==='function')updateAccess();if(typeof loadState==='function')await loadState();
-      }catch(e){show('Terjadi kesalahan: '+(e?.message||String(e)));}
-      finally{button.disabled=false;}
-    });
-    byId('logoutBtn')?.addEventListener('click',async()=>{try{await client.auth.signOut();location.reload();}catch(e){show('Gagal keluar: '+e.message);}});
-    window.addEventListener('error',e=>{if(e.message)show('JavaScript error: '+e.message);});
-  }catch(e){show('Gagal menyiapkan login: '+(e?.message||String(e)));}
-})();
 </script>
 </body></html>
