@@ -85,7 +85,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT'){curren
         const {data:grant,error:grantError}=await client.from('treasury_editors').select('user_id').eq('user_id',data.user.id).maybeSingle();
         if(grantError){show('Login berhasil, tetapi izin bendahara gagal diperiksa: '+grantError.message);return;}
         if(!grant){show('Akun berhasil login, tetapi belum diberi izin bendahara. Minta admin menambahkan akses.');await client.auth.signOut();return;}
-        show('Login berhasil. Memuat Treasury…');byId('loginBox')?.classList.remove('open');location.reload();
+        currentUser=data.user;isEditor=true;show('Login berhasil. Memuat Treasury…');byId('loginBox')?.classList.remove('open');if(typeof updateAccess==='function')updateAccess();if(typeof loadState==='function')await loadState();
       }catch(e){show('Terjadi kesalahan: '+(e?.message||String(e)));}
       finally{button.disabled=false;}
     });
