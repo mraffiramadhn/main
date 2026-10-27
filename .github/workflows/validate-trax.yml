@@ -1,0 +1,19 @@
+name: Validate RamaSpace Trax
+on:
+  push:
+    paths:
+      - "trax/**"
+      - "supabase/**"
+  pull_request:
+    paths:
+      - "trax/**"
+      - "supabase/**"
+jobs:
+  basic-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Trax HTML exists
+        run: test -s trax/index.html
+      - name: Check migration exists
+        run: test -s supabase/migrations/20261027000000_create_trax_pos_tables.sql
