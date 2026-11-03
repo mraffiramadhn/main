@@ -38,6 +38,18 @@
  .tablewrap td button{font-size:11px;padding:5px 8px}
  .notice,.footer{font-size:11px}
 }
+@media(max-width:600px){
+ #paymentRows .tablewrap{overflow:visible;border:0}
+ #paymentRows .tablewrap table,#paymentRows .tablewrap table[style]{display:block;width:100%;min-width:0!important;table-layout:auto}
+ #paymentRows .tablewrap thead{display:none}
+ #paymentRows .tablewrap tbody{display:grid;gap:8px}
+ #paymentRows .tablewrap tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px;background:#0e1929;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+ #paymentRows .tablewrap td{display:block;min-width:0;white-space:normal;text-align:left;padding:5px 0;border:0;overflow-wrap:anywhere;font-size:12px}
+ #paymentRows .tablewrap td:first-child{grid-column:1/-1;font-weight:750;font-size:14px;color:var(--text);padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:5px}
+ #paymentRows .tablewrap td:nth-child(2),#paymentRows .tablewrap td:nth-child(3){text-align:left}
+ #paymentRows .tablewrap td:before{display:block;content:attr(data-label);font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px}
+ #paymentRows .tablewrap td>div{max-width:100%}
+}
 @media(max-width:360px){
  .formgrid{grid-template-columns:1fr}
  .field.full{grid-column:auto}
