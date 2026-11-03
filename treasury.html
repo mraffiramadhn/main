@@ -22,23 +22,25 @@
  .panel-head{gap:8px;align-items:center}.panel-head p{font-size:11px}
  .panel-head button{font-size:11px;padding:8px}
  .formgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
- input,select{font-size:14px;padding:9px}.actions{gap:6px}.actions button{font-size:12px;padding:9px}
+ .field.full{grid-column:1/-1}
+ input,select{font-size:14px;padding:9px}
+ .actions{gap:6px}.actions button{font-size:12px;padding:9px}
  .week-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:5px;scrollbar-width:thin}
  .week-tab{flex:0 0 auto}
- .tablewrap{overflow:visible;border:0}
- .tablewrap table,.tablewrap table[style]{display:block;width:100%;min-width:0!important}
- .tablewrap thead{display:none}.tablewrap tbody{display:grid;gap:9px}
- .tablewrap tr{display:block;background:#0e1929;border:1px solid var(--line);border-radius:11px;padding:7px 10px}
- .tablewrap td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;white-space:normal;text-align:right;padding:7px 0;border-bottom:1px solid #26364e;font-size:12px;overflow-wrap:anywhere}
- .tablewrap td:last-child{border-bottom:0}
- .tablewrap td:before{content:attr(data-label);color:var(--muted);font-size:11px;text-align:left;flex:0 0 37%;font-weight:600}
- .tablewrap td>div{max-width:60%}
+ .tablewrap{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);-webkit-overflow-scrolling:touch}
+ .tablewrap table,.tablewrap table[style]{display:table;width:max-content;min-width:520px!important;border-collapse:collapse}
+ .tablewrap thead{display:table-header-group}
+ .tablewrap tbody{display:table-row-group}
+ .tablewrap tr{display:table-row;background:transparent;border:0;border-radius:0;padding:0}
+ .tablewrap th,.tablewrap td{display:table-cell;white-space:nowrap;text-align:left;padding:9px 10px;font-size:12px;border-bottom:1px solid var(--line)}
+ .tablewrap td:before{content:none}
+ .tablewrap td>div{max-width:none}
  .tablewrap td button{font-size:11px;padding:5px 8px}
- #paymentRows .tablewrap td:nth-child(2){font-size:14px}
  .notice,.footer{font-size:11px}
 }
-@media(max-width:420px){
- .formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}
+@media(max-width:360px){
+ .formgrid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
  .top-actions button{padding:8px 10px}
  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
  .stat .value{font-size:18px}
