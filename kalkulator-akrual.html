@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulator Kekayaan Akrual</title>
+<style>
+  :root { color-scheme: light; --ink:#172033; --muted:#667085; --line:#e4e7ec; --bg:#f5f7fb; --accent:#2457d6; }
+  * { box-sizing:border-box }
+  body { margin:0; padding:24px 14px; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif }
+  main { max-width:760px; margin:auto }
+  header { margin:0 0 20px }
+  h1 { font-size:clamp(23px,5vw,32px); margin:0 0 6px; letter-spacing:-.5px }
+  header p,.hint { color:var(--muted); margin:0 }
+  .panel { background:white; border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 5px 22px #1720330a }
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px }
+  label { display:block; font-weight:650; margin-bottom:6px }
+  input { width:100%; min-width:0; padding:12px; border:1px solid #cfd5df; border-radius:9px; font:inherit; color:var(--ink); background:white }
+  input:focus { outline:3px solid #2457d626; border-color:var(--accent) }
+  input[readonly] { background:#f2f4f7; color:#475467 }
+  .field small { display:block; margin-top:5px; color:var(--muted); font-size:12px }
+  .results { margin-top:20px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px }
+  .result { padding:15px; border-radius:12px; background:#f5f7ff; border:1px solid #e0e7ff }
+  .result span { display:block; color:#526078; font-size:13px; margin-bottom:5px }
+  .result strong { font-size:clamp(17px,3vw,22px); overflow-wrap:anywhere }
+  .result.primary { background:#edf4ff; border-color:#c8d9ff }
+  .result.primary strong { color:#1746b5 }
+  .details { margin-top:18px; padding-top:15px; border-top:1px solid var(--line); display:grid; gap:7px; color:#475467; font-size:14px }
+  .details div { display:flex; justify-content:space-between; gap:16px }
+  .details b { color:var(--ink); text-align:right }
+  .actions { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap }
+  button { border:0; border-radius:9px; padding:11px 16px; font:600 14px system-ui; cursor:pointer }
+  .primary-btn { background:var(--accent); color:white }
+  .secondary { background:#eef1f6; color:#344054 }
+  .note { margin-top:16px; color:var(--muted); font-size:12px }
+  .error { color:#b42318; min-height:20px; margin-top:10px; font-size:13px }
+  @media(max-width:560px) { .grid,.results { grid-template-columns:1fr } .panel { padding:16px } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Kalkulator Kekayaan Akrual</h1>
+    <p>Hitung estimasi imbal hasil deposito atau obligasi berdasarkan periode penempatan.</p>
+  </header>
+  <section class="panel" aria-label="Data penempatan dana">
+    <div class="grid">
+      <div class="field"><label for="openDate">Tanggal Pembukaan</label><input id="openDate" type="date"></div>
+      <div class="field"><label for="closeDate">Tanggal Penutupan</label><input id="closeDate" type="date"></div>
+      <div class="field"><label for="tenor">Tenor (hari)</label><input id="tenor" type="number" readonly><small>Dihitung otomatis dari kedua tanggal.</small></div>
+      <div class="field"><label for="nominal">Nominal Penempatan (Rp)</label><input id="nominal" type="number" min="0" step="1000" placeholder="Contoh: 10000000"></div>
+      <div class="field"><label for="rate">Persentase Imbal Hasil (% per tahun)</label><input id="rate" type="number" min="0" step="0.01" placeholder="Contoh: 6.5"><small>Masukkan angka persen, misalnya 6,5 untuk 6,5%.</small></div>
+      <div class="field"><label for="today">Tanggal Perhitungan</label><input id="today" type="date"><small>Bisa diubah untuk melihat nilai akrual pada tanggal tertentu.</small></div>
+    </div>
+    <div class="results" aria-live="polite">
+      <div class="result primary"><span>Nilai Timbal Balik saat Jatuh Tempo</span><strong id="maturityValue">Rp0</strong></div>
+      <div class="result"><span>Imbal Hasil Total hingga Jatuh Tempo</span><strong id="totalReturn">Rp0</strong></div>
+      <div class="result"><span>Imbal Hasil yang Telah Terakru</span><strong id="accruedReturn">Rp0</strong></div>
+      <div class="result"><span>Estimasi Kekayaan Akrual Saat Ini</span><strong id="accruedValue">Rp0</strong></div>
+    </div>
+    <div class="details">
+      <div><span>Hari berjalan yang dihitung</span><b id="elapsed">0 hari</b></div>
+      <div><span>Sisa tenor</span><b id="remaining">0 hari</b></div>
+      <div><span>Status periode</span><b id="status">Belum ada data</b></div>
+    </div>
+    <div class="error" id="error" role="alert"></div>
+    <div class="actions"><button class="primary-btn" id="calculate" type="button">Hitung Ulang</button><button class="secondary" id="reset" type="button">Reset</button></div>
+    <p class="note">Rumus estimasi: imbal hasil = nominal × (persentase ÷ 100) × (jumlah hari ÷ 365). Nilai timbal balik saat jatuh tempo = nominal + imbal hasil total. Akrual dihitung secara proporsional dari tanggal pembukaan sampai tanggal perhitungan, maksimal sepanjang tenor. Perhitungan ini belum memperhitungkan pajak, biaya, kupon bertahap, perubahan harga pasar obligasi, atau ketentuan produk tertentu.</p>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const fields = ['openDate','closeDate','nominal','rate','today'];
+  const rupiah = value => new Intl.NumberFormat('id-ID', {style:'currency', currency:'IDR', maximumFractionDigits:0}).format(Number.isFinite(value) ? value : 0);
+  const parseDate = value => { if (!value) return null; const [y,m,d] = value.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const daysBetween = (a,b) => Math.round((b-a)/86400000);
+  const setText = (id, value) => $(id).textContent = value;
+  function calculate() {
+    const start = parseDate($('openDate').value), end = parseDate($('closeDate').value), asOf = parseDate($('today').value);
+    const nominal = Number($('nominal').value), rate = Number($('rate').value);
+    $('error').textContent = '';
+    if (!start || !end) { $('tenor').value = ''; setText('error', 'Isi tanggal pembukaan dan tanggal penutupan.'); return; }
+    const tenor = daysBetween(start, end); $('tenor').value = tenor;
+    if (tenor <= 0) { setText('error', 'Tanggal penutupan harus setelah tanggal pembukaan.'); clearResults(); return; }
+    if ($('nominal').value === '' || $('rate').value === '' || !Number.isFinite(nominal) || nominal < 0 || !Number.isFinite(rate) || rate < 0) { setText('error', 'Isi nominal dan persentase imbal hasil dengan angka nol atau lebih.'); clearResults(); return; }
+    if (!asOf) { setText('error', 'Isi tanggal perhitungan.'); clearResults(); return; }
+    const elapsedRaw = daysBetween(start, asOf), elapsed = Math.max(0, Math.min(tenor, elapsedRaw));
+    const totalReturn = nominal * (rate/100) * (tenor/365), accruedReturn = nominal * (rate/100) * (elapsed/365);
+    setText('maturityValue', rupiah(nominal + totalReturn)); setText('totalReturn', rupiah(totalReturn));
+    setText('accruedReturn', rupiah(accruedReturn)); setText('accruedValue', rupiah(nominal + accruedReturn));
+    setText('elapsed', elapsed + ' hari'); setText('remaining', Math.max(0, tenor-elapsed) + ' hari');
+    setText('status', elapsedRaw < 0 ? 'Belum dimulai' : elapsedRaw >= tenor ? 'Jatuh tempo' : 'Berjalan');
+  }
+  function clearResults() {
+    ['maturityValue','totalReturn','accruedReturn','accruedValue'].forEach(id => setText(id, rupiah(0)));
+    setText('elapsed','0 hari'); setText('remaining','0 hari'); setText('status','Periksa data');
+  }
+  function reset() { fields.forEach(id => $(id).value = ''); $('today').value = new Date().toISOString().slice(0,10); $('tenor').value = ''; clearResults(); $('error').textContent = ''; }
+  fields.forEach(id => $(id).addEventListener('input', calculate));
+  $('calculate').addEventListener('click', calculate); $('reset').addEventListener('click', reset);
+  $('today').value = new Date().toISOString().slice(0,10); calculate();
+})();
+</script>
+</body>
+</html>
