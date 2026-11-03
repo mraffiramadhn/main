@@ -76,6 +76,57 @@
  .stat .value{font-size:16px}
  .panel{padding:10px}
 }
+
+/* Final mobile containment and proportional sizing */
+@media (max-width: 780px) {
+  .layout { grid-template-columns: minmax(0, 1fr) !important; }
+  .layout > div { min-width: 0 !important; width: 100%; }
+  .panel, .stat, .panel-head, .panel-head > div { min-width: 0; }
+  .panel-head { flex-wrap: wrap; }
+  .panel-head > div { flex: 1 1 180px; }
+  .tablewrap { max-width: 100%; }
+}
+@media (max-width: 600px) {
+  html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .wrap { width: 100%; max-width: 100%; padding: 12px 10px 28px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat { overflow: hidden; padding: 10px; }
+  .stat .value { font-size: clamp(16px, 4.3vw, 21px); }
+  .panel { width: 100%; padding: 11px; }
+  .formgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .formgrid > *, .field { min-width: 0; }
+  input, select { min-width: 0; max-width: 100%; }
+  .actions { align-items: stretch; }
+  .actions button { flex: 0 1 auto; min-width: 0; }
+  .tablewrap { width: 100%; overflow-x: auto; }
+  .tablewrap table { width: max-content; min-width: 520px; }
+  #paymentRows .tablewrap { overflow: visible; }
+  #paymentRows .tablewrap table,
+  #paymentRows .tablewrap table[style] {
+    display: block; width: 100%; min-width: 0 !important; table-layout: fixed;
+  }
+  #paymentRows .tablewrap tbody {
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px;
+  }
+  #paymentRows .tablewrap tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%; min-width: 0; gap: 0 10px;
+  }
+  #paymentRows .tablewrap td {
+    min-width: 0; white-space: normal; overflow-wrap: anywhere;
+    text-align: left !important;
+  }
+  #paymentRows .tablewrap td:first-child { grid-column: 1 / -1; }
+  #paymentRows .tablewrap td:nth-child(2),
+  #paymentRows .tablewrap td:nth-child(3) { text-align: left !important; }
+}
+@media (max-width: 380px) {
+  .formgrid { grid-template-columns: minmax(0, 1fr); }
+  .field.full { grid-column: auto; }
+  .stats { gap: 6px; }
+  .stat { padding: 9px; }
+  .panel { padding: 10px; }
+}
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="eyebrow">Class finance · transparent & accountable</div><h1>💸 Treasury <span id="classTitle">X1</span></h1><div class="sub">Pusat transparansi kas kelas · data publik, pengelolaan terbatas</div></div><div class="top-actions"><span class="pill" id="connection">Menghubungkan…</span><a id="accessMenu" href="access.html" style="display:none;color:var(--cyan);align-self:center">Kelola akses</a><a id="auditMenu" href="audit.html" style="display:none;color:var(--cyan);align-self:center">Log aktivitas</a><button id="loginToggle">Login bendahara</button><button id="logoutBtn" style="display:none">Keluar</button></div></header>
