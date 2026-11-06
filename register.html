@@ -15,14 +15,13 @@ label{display:block;color:var(--muted);font-size:12px;margin:15px 0 5px}
 input{width:100%;background:#0d1727;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:12px;font:inherit;min-width:0}
 button{cursor:pointer;border:1px solid var(--cyan);border-radius:10px;padding:11px 14px;background:var(--cyan);color:#06251f;font:inherit;font-weight:800;width:100%;margin-top:16px}
 button:disabled{opacity:.55;cursor:not-allowed}.status{font-size:13px;min-height:22px;margin-top:13px;color:var(--muted)}.status.good{color:var(--green)}.status.bad{color:var(--red)}
-.otpbox{display:none;border-top:1px solid var(--line);margin-top:20px;padding-top:17px}.otpbox.show{display:block}
 .notice{border-left:2px solid var(--amber);padding-left:10px;margin-top:18px;font-size:12px;color:var(--muted)}
 a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;font-size:13px}
 @media(max-width:420px){.card{padding:19px}h1{font-size:26px}}
 </style></head>
 <body><main class="card">
 <div class="eyebrow">Treasury X1 · Account</div><h1>Daftar akun</h1>
-<p class="muted">Buat akun menggunakan email pribadi yang aktif. Email harus dikonfirmasi sebelum akun dapat digunakan untuk login.</p>
+<p class="muted">Buat akun menggunakan email pribadi yang aktif. Email harus dikonfirmasi melalui tautan yang dikirim Supabase sebelum akun dapat digunakan untuk login.</p>
 <form id="signupForm">
 <label for="email">Email</label><input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="nama@email.com">
 <label for="password">Buat password</label><input id="password" type="password" autocomplete="new-password" required minlength="8" maxlength="72" placeholder="Minimal 8 karakter">
@@ -30,13 +29,6 @@ a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;f
 <button id="signupBtn" type="submit">Daftar & kirim konfirmasi email</button>
 </form>
 <div id="status" class="status" aria-live="polite"></div>
-<section id="otpBox" class="otpbox">
-<strong>Konfirmasi dengan kode OTP</strong>
-<p class="muted">Jika email Supabase yang diterima berisi kode angka, masukkan kode tersebut di sini. Jika email berisi tombol/link konfirmasi, cukup klik link tersebut.</p>
-<label for="otp">Kode OTP email</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Kode dari email">
-<button id="verifyBtn" type="button">Verifikasi email</button>
-<div id="otpStatus" class="status" aria-live="polite"></div>
-</section>
 <div class="notice">Pendaftaran hanya membuat akun dan mengonfirmasi email. Akun baru tidak otomatis mendapat akses bendahara. Pemberian atau pencabutan role tetap dilakukan Superadmin melalui Kelola Akses.</div>
 <div class="links"><a href="treasury.html">← Kembali ke Treasury</a><a href="treasury.html#loginBox">Sudah punya akun? Login</a></div>
 </main>
@@ -45,7 +37,6 @@ const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
-let registeredEmail='';
 function setStatus(id,message,type=''){const el=$(id);el.textContent=message;el.className='status'+(type?' '+type:'')}
 $('signupForm').addEventListener('submit',async e=>{
  e.preventDefault();
@@ -58,30 +49,15 @@ $('signupForm').addEventListener('submit',async e=>{
  try{
   const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:'https://ramaspace.my.id/treasury.html'}});
   if(error)throw error;
-  registeredEmail=email;
-  $('otpBox').classList.add('show');
   $('signupForm').style.display='none';
   if(data.session){
    setStatus('status','Akun berhasil dibuat. Email sudah terverifikasi, tetapi akses Treasury tetap menunggu persetujuan Superadmin.','good');
   }else{
-   setStatus('status','Pendaftaran diterima. Periksa kotak masuk atau folder spam untuk email konfirmasi. Jika email berisi kode OTP, masukkan kode tersebut di bawah.','good');
+   setStatus('status','Pendaftaran berhasil dikirim. Buka email dari Supabase lalu klik tautan “Confirm email address”. Setelah dikonfirmasi, kamu akan diarahkan kembali ke Treasury. Akun tetap menunggu persetujuan Superadmin untuk memperoleh role.','good');
   }
  }catch(err){
   setStatus('status','Pendaftaran gagal: '+(err?.message||'Terjadi kesalahan.'),'bad');
   $('signupBtn').disabled=false;
  }
 });
-$('verifyBtn').onclick=async()=>{
- const token=$('otp').value.trim();
- if(!registeredEmail||!token){setStatus('otpStatus','Masukkan kode OTP dari email.','bad');return}
- $('verifyBtn').disabled=true;setStatus('otpStatus','Memverifikasi email…');
- try{
-  const {data,error}=await sb.auth.verifyOtp({email:registeredEmail,token,type:'signup'});
-  if(error)throw error;
-  setStatus('otpStatus','Email berhasil dikonfirmasi. Akun belum memiliki role; hubungi Superadmin untuk pemberian akses.','good');
- }catch(err){
-  setStatus('otpStatus','Verifikasi gagal: '+(err?.message||'Kode tidak valid atau kedaluwarsa.'),'bad');
-  $('verifyBtn').disabled=false;
- }
-};
 </script></body></html>
