@@ -6,7 +6,7 @@
 <title>Daftar Akun — Treasury X1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">$('verifyBtn').onclick=async()=>{
  const token=$('otp').value.trim();
- if(!/^\d{6}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 6 digit.','bad');return}
+ if(!/^\d{8}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 8 digit.','bad');return}
  $('verifyBtn').disabled=true;setStatus('otpStatus','Memverifikasi email…');
  try{
   const email=$('email').value.trim().toLowerCase();
@@ -45,8 +45,8 @@ a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;f
 <div id="status" class="status" aria-live="polite"></div>
 <section id="otpBox" style="display:none;border-top:1px solid var(--line);margin-top:20px;padding-top:17px">
 <strong>Verifikasi email dengan OTP</strong>
-<p class="muted">Masukkan kode 6 digit yang dikirim Supabase ke email kamu.</p>
-<label for="otp">Kode OTP</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456">
+<p class="muted">Masukkan kode 8 digit yang dikirim Supabase ke email kamu.</p>
+<label for="otp">Kode OTP</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" placeholder="12345678">
 <button id="verifyBtn" type="button">Verifikasi email</button>
 <div id="otpStatus" class="status" aria-live="polite"></div>
 </section>
