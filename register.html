@@ -47,7 +47,7 @@ const $=id=>document.getElementById(id);
 function setStatus(id,message,type=''){const el=$(id);el.textContent=message;el.className='status'+(type?' '+type:'')}
 $('verifyBtn').addEventListener('click',async()=>{
  const token=$('otp').value.trim();
- if(!/^\\d{8}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 8 digit.','bad');return}
+ if(!/^\d{8}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 8 digit.','bad');return}
  $('verifyBtn').disabled=true;setStatus('otpStatus','Memverifikasi email…');
  try{
   const email=$('email').value.trim().toLowerCase();
