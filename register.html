@@ -4,7 +4,21 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1220">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 <title>Daftar Akun — Treasury X1</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">$('verifyBtn').onclick=async()=>{
+ const token=$('otp').value.trim();
+ if(!/^\d{6}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 6 digit.','bad');return}
+ $('verifyBtn').disabled=true;setStatus('otpStatus','Memverifikasi email…');
+ try{
+  const email=$('email').value.trim().toLowerCase();
+  const {error}=await sb.auth.verifyOtp({email,token,type:'email'});
+  if(error)throw error;
+  setStatus('otpStatus','Email berhasil dikonfirmasi. Akun belum memiliki role; hubungi Superadmin untuk pemberian akses.','good');
+ }catch(err){
+  setStatus('otpStatus','Verifikasi gagal: '+(err?.message||'Kode tidak valid atau kedaluwarsa.'),'bad');
+  $('verifyBtn').disabled=false;
+ }
+};
+</script>
 <style>
 :root{color-scheme:dark;--bg:#0b1220;--panel:#121c2e;--line:#26364e;--text:#edf4ff;--muted:#9aabc4;--cyan:#5eead4;--red:#fda4af;--green:#86efac;--amber:#fcd34d}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at top right,#142b48 0,transparent 44%),var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,sans-serif}
@@ -21,7 +35,7 @@ a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;f
 </style></head>
 <body><main class="card">
 <div class="eyebrow">Treasury X1 · Account</div><h1>Daftar akun</h1>
-<p class="muted">Buat akun menggunakan email pribadi yang aktif. Email harus dikonfirmasi melalui tautan yang dikirim Supabase sebelum akun dapat digunakan untuk login.</p>
+<p class="muted">Buat akun menggunakan email pribadi yang aktif. Email harus dikonfirmasi dengan kode OTP yang dikirim Supabase sebelum akun dapat digunakan untuk login.</p>
 <form id="signupForm">
 <label for="email">Email</label><input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="nama@email.com">
 <label for="password">Buat password</label><input id="password" type="password" autocomplete="new-password" required minlength="8" maxlength="72" placeholder="Minimal 8 karakter">
@@ -29,6 +43,13 @@ a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;f
 <button id="signupBtn" type="submit">Daftar & kirim konfirmasi email</button>
 </form>
 <div id="status" class="status" aria-live="polite"></div>
+<section id="otpBox" style="display:none;border-top:1px solid var(--line);margin-top:20px;padding-top:17px">
+<strong>Verifikasi email dengan OTP</strong>
+<p class="muted">Masukkan kode 6 digit yang dikirim Supabase ke email kamu.</p>
+<label for="otp">Kode OTP</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456">
+<button id="verifyBtn" type="button">Verifikasi email</button>
+<div id="otpStatus" class="status" aria-live="polite"></div>
+</section>
 <div class="notice">Pendaftaran hanya membuat akun dan mengonfirmasi email. Akun baru tidak otomatis mendapat akses bendahara. Pemberian atau pencabutan role tetap dilakukan Superadmin melalui Kelola Akses.</div>
 <div class="links"><a href="treasury.html">← Kembali ke Treasury</a><a href="treasury.html#loginBox">Sudah punya akun? Login</a></div>
 </main>
@@ -50,10 +71,11 @@ $('signupForm').addEventListener('submit',async e=>{
   const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:'https://ramaspace.my.id/treasury.html'}});
   if(error)throw error;
   $('signupForm').style.display='none';
+  $('otpBox').style.display='block';
   if(data.session){
    setStatus('status','Akun berhasil dibuat. Email sudah terverifikasi, tetapi akses Treasury tetap menunggu persetujuan Superadmin.','good');
   }else{
-   setStatus('status','Pendaftaran berhasil dikirim. Buka email dari Supabase lalu klik tautan “Confirm email address”. Setelah dikonfirmasi, kamu akan diarahkan kembali ke Treasury. Akun tetap menunggu persetujuan Superadmin untuk memperoleh role.','good');
+   setStatus('status','Pendaftaran berhasil. Periksa email dan masukkan kode OTP 6 digit di bawah. Akun tetap menunggu persetujuan Superadmin untuk memperoleh role.','good');
   }
  }catch(err){
   setStatus('status','Pendaftaran gagal: '+(err?.message||'Terjadi kesalahan.'),'bad');
