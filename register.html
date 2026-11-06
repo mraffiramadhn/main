@@ -42,14 +42,22 @@ a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;f
 <script>
 const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
+let sb=null;
+try{
+ if(!window.supabase?.createClient) throw new Error('Library Supabase belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
+ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+}catch(initError){
+ const status=document.getElementById('otpStatus');
+ if(status){status.textContent=initError.message;status.className='status bad';}
+}
 function setStatus(id,message,type=''){const el=$(id);el.textContent=message;el.className='status'+(type?' '+type:'')}
 $('verifyBtn').addEventListener('click',async()=>{
  const token=$('otp').value.trim();
  if(!/^\d{8}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 8 digit.','bad');return}
  $('verifyBtn').disabled=true;setStatus('otpStatus','Memverifikasi email…');
  try{
+  if(!sb) throw new Error('Koneksi Supabase belum siap. Muat ulang halaman dan coba lagi.');
   const email=$('email').value.trim().toLowerCase();
   const {error}=await sb.auth.verifyOtp({email,token,type:'email'});
   if(error)throw error;
@@ -68,6 +76,7 @@ $('signupForm').addEventListener('submit',async e=>{
  if(password!==confirmation){setStatus('status','Konfirmasi password tidak sama.','bad');return}
  $('signupBtn').disabled=true;setStatus('status','Mendaftarkan akun dan mengirim email konfirmasi…');
  try{
+  if(!sb) throw new Error('Library Supabase belum termuat. Muat ulang halaman.');
   const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:'https://ramaspace.my.id/treasury.html'}});
   if(error)throw error;
   $('signupForm').style.display='none';
