@@ -250,7 +250,7 @@ $('exportPdf').onclick=()=>{
  if(!window.jspdf?.jsPDF){alert('Fitur PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.');return}
  if(!transactions.length){alert('Belum ada mutasi kas untuk diekspor.');return}
  const {jsPDF}=window.jspdf;
- const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+ const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
  const money=value=>new Intl.NumberFormat('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value)||0);
  const dateLabel=value=>{
   if(!value)return '—';
