@@ -140,7 +140,7 @@
 <div class="stat"><div class="label">KETUNTASAN MINGGU INI</div><div class="value" id="completion">0%</div><div class="hint" id="completionHint">Belum ada data siswa</div><div class="progress"><span id="progressBar"></span></div></div>
 </section>
 <div class="layout"><div>
-<section class="panel"><div class="panel-head"><div><h2>Mutasi kas</h2><p>Riwayat pemasukan dan pengeluaran</p></div><button id="exportCsv">Ekspor CSV</button></div><div class="editoronly" id="transactionForm"><div class="formgrid"><div><label>Tanggal</label><input id="txDate" type="date"></div><div><label>Jenis mutasi</label><select id="txType"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div><div><label>Kategori / keterangan</label><input id="txCategory" placeholder="Contoh: Iuran kas"></div><div><label>Nominal (Rp)</label><input id="txAmount" type="number" min="1" step="1" placeholder="5000"></div><div><label>Sumber / tujuan</label><select id="txAccount"><option value="cash">Tunai</option><option value="bank">Rekening</option></select></div><div><label>Catatan (opsional)</label><input id="txNote" placeholder="Keterangan tambahan"></div></div><div class="actions"><button class="primary" id="addTx">Tambah mutasi</button></div><div class="status" id="txStatus"></div></div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Mutasi</th><th>Akun</th><th>Nominal</th><th>Saldo gabungan</th><th></th></tr></thead><tbody id="txRows"></tbody></table></div><div class="empty" id="txEmpty">Belum ada mutasi kas.</div><div class="notice">Riwayat transaksi dipakai untuk menghitung saldo kas. Koreksi transaksi sebaiknya dilakukan dengan catatan pembalik agar jejak audit tetap jelas.</div></section>
+<section class="panel"><div class="panel-head"><div><h2>Mutasi kas</h2><p>Riwayat pemasukan dan pengeluaran</p></div><button id="exportCsv">Ekspor CSV</button><button id="exportPdf" class="primary" type="button">Ekspor Mutasi PDF</button></div><div class="editoronly" id="transactionForm"><div class="formgrid"><div><label>Tanggal</label><input id="txDate" type="date"></div><div><label>Jenis mutasi</label><select id="txType"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div><div><label>Kategori / keterangan</label><input id="txCategory" placeholder="Contoh: Iuran kas"></div><div><label>Nominal (Rp)</label><input id="txAmount" type="number" min="1" step="1" placeholder="5000"></div><div><label>Sumber / tujuan</label><select id="txAccount"><option value="cash">Tunai</option><option value="bank">Rekening</option></select></div><div><label>Catatan (opsional)</label><input id="txNote" placeholder="Keterangan tambahan"></div></div><div class="actions"><button class="primary" id="addTx">Tambah mutasi</button></div><div class="status" id="txStatus"></div></div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Mutasi</th><th>Akun</th><th>Nominal</th><th>Saldo gabungan</th><th></th></tr></thead><tbody id="txRows"></tbody></table></div><div class="empty" id="txEmpty">Belum ada mutasi kas.</div><div class="notice">Riwayat transaksi dipakai untuk menghitung saldo kas. Koreksi transaksi sebaiknya dilakukan dengan catatan pembalik agar jejak audit tetap jelas.</div></section>
 <section class="panel"><div class="panel-head"><div><h2>Dashboard kas</h2><p>Ringkasan arus kas tercatat</p></div></div><div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0"><div><div class="label">Total pemasukan</div><div class="value income" id="incomeSum">Rp0</div></div><div><div class="label">Total pengeluaran</div><div class="value expense" id="expenseSum">Rp0</div></div></div><div class="notice" id="lastUpdated">Belum ada pembaruan.</div></section>
 </div><div>
 <section class="panel"><div class="panel-head"><div><h2>Ketuntasan kas mingguan</h2><p>Centang siswa yang sudah membayar per minggu</p></div></div><div class="editoronly" id="rosterForm"><h3 style="margin:0 0 10px">INPUT PEMBAYARAN KAS</h3><div class="formgrid"><div class="field full"><label>Nama siswa</label><select id="paymentStudent"><option value="">Pilih nama siswa</option></select></div><div class="field full"><label>Kekurangan pembayaran</label><div id="debtDisplay" style="font-weight:800;font-size:20px">Pilih nama siswa</div><div class="muted" id="debtDetail" style="font-size:12px">Pilih nama untuk melihat total tunggakan.</div></div><div class="field full"><label>Jenis pembayaran</label><select id="paymentMode"><option value="due">Pembayaran tertagih (minggu ini dan sebelumnya)</option><option value="future">Pembayaran untuk minggu depan</option></select></div><div class="field"><label>Periode pembayaran</label><select id="paymentStartWeek"></select></div><div class="field"><label>Nominal (kelipatan Rp5.000)</label><input id="paymentAmount" type="number" min="5000" step="5000" value="5000"></div><div class="field"><label>Masuk ke</label><select id="paymentAccount"><option value="cash">Kas tunai</option><option value="bank">Rekening</option></select></div></div><div class="actions"><button class="primary" id="payFull">Lunasi semua</button><button id="payHalf">Bayar setengah</button><button class="primary" id="submitPayment">Input pembayaran</button></div><div class="status" id="paymentStatus"></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="formgrid"><div class="field"><label>Tambah siswa baru</label><input id="studentName" placeholder="Nama lengkap"></div><div class="field"><label>Iuran per minggu (Rp)</label><input id="weeklyAmount" type="number" min="5000" step="5000" value="5000"></div></div><div class="actions"><button id="addStudent">Tambah siswa</button><button id="addWeek">Tambah minggu</button></div><div class="status" id="rosterStatus"></div></div><div class="actions" style="margin:10px 0 4px"><button id="exportPaymentPdf" type="button">Ekspor rekap pembayaran PDF</button></div><div class="week-tabs" id="weekTabs"></div><div id="paymentRows" class="muted">Belum ada daftar siswa.</div><div class="notice">Status pembayaran ditampilkan secara publik agar rekap kelas transparan. Hindari memasukkan informasi pribadi selain nama dan status iuran.</div></section>
@@ -240,6 +240,56 @@ $('exportPaymentPdf').onclick=()=>{
  doc.save('rekap-kas-'+today()+'.pdf');
 };
 $('exportCsv').onclick=()=>{const rows=[['Tanggal','Jenis','Kategori','Akun','Nominal','Catatan'],...state.transactions.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[t.date,t.type==='income'?'Pemasukan':'Pengeluaran',t.category,t.account==='bank'?'Rekening':'Tunai',t.amount,t.note||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');download(csv,'treasury-mutasi-'+today()+'.csv','text/csv;charset=utf-8;')};
+$('exportPdf').onclick=()=>{
+ const transactions=state.transactions.map((t,index)=>({...t,_index:index})).sort((a,b)=>{
+  const dateCompare=String(a.date||'').localeCompare(String(b.date||''));
+  if(dateCompare!==0)return dateCompare;
+  const timeCompare=String(a.time||'').localeCompare(String(b.time||''));
+  return timeCompare!==0?timeCompare:a._index-b._index;
+ });
+ if(!window.jspdf?.jsPDF){alert('Fitur PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.');return}
+ if(!transactions.length){alert('Belum ada mutasi kas untuk diekspor.');return}
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+ const money=value=>new Intl.NumberFormat('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value)||0);
+ const dateLabel=value=>{
+  if(!value)return '—';
+  const parts=String(value).slice(0,10).split('-');
+  if(parts.length!==3)return String(value);
+  const date=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
+  return date.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+ };
+ doc.setFont('helvetica','bold');doc.setFontSize(14);
+ doc.setTextColor(35,85,135);
+ doc.text('BUKU BESAR MUTASI KAS',14,16);
+ doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(75,85,99);
+ doc.text((state.className||'Kas Kelas X1')+' · Seluruh transaksi',14,22);
+ doc.text('Tanggal ekspor: '+new Date().toLocaleDateString('id-ID'),14,27);
+ const body=transactions.map((t,i)=>[
+  String(i+1),
+  dateLabel(t.date),
+  [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
+  t.type==='income'?money(t.amount):'—',
+  t.type==='expense'?money(t.amount):'—'
+ ]);
+ doc.autoTable({
+  head:[['No','Tanggal','Keterangan','Pemasukan (Rp)','Pengeluaran (Rp)']],
+  body,
+  startY:32,
+  theme:'grid',
+  margin:{left:14,right:14,top:32,bottom:15},
+  styles:{font:'helvetica',fontSize:8,cellPadding:2.2,valign:'middle',lineColor:[205,215,225],lineWidth:0.2,textColor:[40,48,58],overflow:'linebreak'},
+  headStyles:{fillColor:[47,109,176],textColor:[255,255,255],fontStyle:'bold',halign:'center',minCellHeight:12},
+  columnStyles:{0:{cellWidth:10,halign:'center'},1:{cellWidth:27,halign:'center'},2:{cellWidth:68},3:{cellWidth:36,halign:'right'},4:{cellWidth:36,halign:'right'}},
+  didParseCell:data=>{if(data.section==='body'&&(data.column.index===3||data.column.index===4)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
+ });
+ const pages=doc.internal.getNumberOfPages();
+ for(let page=1;page<=pages;page++){
+  doc.setPage(page);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,120,130);
+  doc.text('Halaman '+page+' / '+pages,doc.internal.pageSize.getWidth()-14,doc.internal.pageSize.getHeight()-7,{align:'right'});
+ }
+ doc.save('mutasi-kas-lengkap-'+today()+'.pdf');
+};
 $('exportJson').onclick=()=>download(JSON.stringify(state,null,2),'treasury-backup-'+today()+'.json','application/json');
 function download(content,name,type){const blob=new Blob(['\ufeff',content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 $('resetData').onclick=async()=>{if(!confirm('Yakin reset semua transaksi, siswa, dan periode? Tindakan ini tidak dapat dibatalkan.'))return;state=structuredClone(DEFAULT);selectedWeek=null;if(await persist())setStatus('adminStatus','Data berhasil direset.')};
