@@ -267,6 +267,13 @@ $('exportPdf').onclick=()=>{
  const oldestDate=chronological[0]?.date;
  const newestDate=transactions[0]?.date;
  const periodLabel=oldestDate===newestDate?dateLabel(oldestDate):dateLabel(oldestDate)+' s.d. '+dateLabel(newestDate);
+ let runningBalance=openingBalance;
+ const transactionBalances={};
+ chronological.forEach(t=>{
+  const opening=runningBalance;
+  runningBalance+=(t.type==='income'?1:-1)*Number(t.amount||0);
+  transactionBalances[t.id]={opening,ending:runningBalance};
+ });
 
  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(35,85,135);
  doc.text('LAPORAN MUTASI KAS',14,16);
@@ -293,23 +300,29 @@ $('exportPdf').onclick=()=>{
  const detailY=doc.lastAutoTable.finalY+13;
  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,85,135);
  doc.text('II. Rincian Buku Besar Mutasi Kas',14,detailY);
- const body=transactions.map((t,i)=>[
-  String(i+1),
-  dateLabel(t.date),
-  [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
-  t.type==='income'?money(t.amount):'—',
-  t.type==='expense'?money(t.amount):'—'
- ]);
+ const body=transactions.map((t,i)=>{
+  const balance=transactionBalances[t.id]||{opening:0,ending:0};
+  return [
+   String(i+1),
+   dateLabel(t.date),
+   [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
+   t.account==='bank'?'Rekening':'Tunai',
+   t.type==='income'?money(t.amount):'—',
+   t.type==='expense'?money(t.amount):'—',
+   money(balance.opening),
+   money(balance.ending)
+  ];
+ });
  doc.autoTable({
-  head:[['No','Tanggal','Keterangan','Pemasukan (Rp)','Pengeluaran (Rp)']],
+  head:[['No','Tanggal','Keterangan','Metode Pembayaran','Pemasukan (Rp)','Pengeluaran (Rp)','Saldo Awal (Rp)','Saldo Akhir (Rp)']],
   body,
   startY:detailY+5,
   theme:'grid',
   margin:{left:14,right:14,top:15,bottom:15},
   styles:{font:'helvetica',fontSize:8,cellPadding:2.2,valign:'middle',lineColor:[205,215,225],lineWidth:0.2,textColor:[40,48,58],overflow:'linebreak'},
   headStyles:{fillColor:[47,109,176],textColor:[255,255,255],fontStyle:'bold',halign:'center',minCellHeight:12},
-  columnStyles:{0:{cellWidth:10,halign:'center'},1:{cellWidth:31,halign:'center'},2:{cellWidth:69},3:{cellWidth:33,halign:'right'},4:{cellWidth:33,halign:'right'}},
-  didParseCell:data=>{if(data.section==='body'&&(data.column.index===3||data.column.index===4)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
+  columnStyles:{0:{cellWidth:9,halign:'center'},1:{cellWidth:27,halign:'center'},2:{cellWidth:58},3:{cellWidth:28,halign:'center'},4:{cellWidth:33,halign:'right'},5:{cellWidth:33,halign:'right'},6:{cellWidth:32,halign:'right'},7:{cellWidth:32,halign:'right'}},
+  didParseCell:data=>{if(data.section==='body'&&(data.column.index>=4)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
  });
  const pages=doc.internal.getNumberOfPages();
  for(let page=1;page<=pages;page++){
