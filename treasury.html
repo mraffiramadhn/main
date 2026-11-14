@@ -280,7 +280,7 @@ $('exportPaymentPdf').onclick=()=>{
  doc.save('rekap-kas-'+today()+'.pdf');
 };
 $('exportCsv').onclick=()=>{
- if(!requireExportAccess())return;const rows=[['Tanggal','Jenis','Kategori','Akun','Nominal','Catatan'],...state.transactions.slice().sort(compareTransactionsNewestFirst).map(t=>[t.date,t.type==='income'?'Pemasukan':t.type==='expense'?'Pengeluaran':'Transfer',t.category,t.type==='transfer'?(t.fromAccount==='cash'?'Tunai → Rekening':'Rekening → Tunai'):(t.account==='bank'?'Rekening':'Tunai'),t.amount,t.note||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');download(csv,'treasury-mutasi-'+today()+'.csv','text/csv;charset=utf-8;')};
+ if(!requireExportAccess())return;const rows=[['ID Transaksi','Tanggal','Jenis','Kategori','Akun / Metode','Nominal','Catatan'],...state.transactions.slice().sort(compareTransactionsNewestFirst).map(t=>[t.transactionId||'',t.date,t.type==='income'?'Pemasukan':t.type==='expense'?'Pengeluaran':'Transfer',t.category,t.type==='transfer'?(t.fromAccount==='cash'?'Tunai → Rekening':'Rekening → Tunai'):(t.account==='bank'?'Rekening':'Tunai'),t.amount,t.note||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');download(csv,'treasury-mutasi-'+today()+'.csv','text/csv;charset=utf-8;')};
 $('exportPdf').onclick=()=>{
  if(!requireExportAccess())return;
  const transactions=state.transactions.slice().sort(compareTransactionsNewestFirst);
@@ -341,6 +341,7 @@ $('exportPdf').onclick=()=>{
   const balance=transactionBalances[t.id]||{opening:0,ending:0};
   return [
    String(i+1),
+   t.transactionId||'—',
    dateLabel(t.date),
    [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
    t.type==='transfer'?(t.fromAccount==='cash'?'Tunai → Rekening':'Rekening → Tunai'):(t.account==='bank'?'Rekening':'Tunai'),
@@ -352,15 +353,15 @@ $('exportPdf').onclick=()=>{
   ];
  });
  doc.autoTable({
-  head:[['No','Tanggal','Keterangan','Metode Pembayaran','Pemasukan (Rp)','Pengeluaran (Rp)','Transfer (Rp)','Saldo Awal (Rp)','Saldo Akhir (Rp)']],
+  head:[['No','ID Transaksi','Tanggal','Keterangan','Metode Pembayaran','Pemasukan (Rp)','Pengeluaran (Rp)','Transfer (Rp)','Saldo Awal (Rp)','Saldo Akhir (Rp)']],
   body,
   startY:detailY+5,
   theme:'grid',
   margin:{left:8,right:8,top:12,bottom:12},
   styles:{font:'helvetica',fontSize:6.2,cellPadding:1.4,valign:'middle',lineColor:[205,215,225],lineWidth:0.2,textColor:[40,48,58],overflow:'linebreak'},
   headStyles:{fillColor:[47,109,176],textColor:[255,255,255],fontStyle:'bold',halign:'center',minCellHeight:12},
-  columnStyles:{0:{cellWidth:6,halign:'center'},1:{cellWidth:17,halign:'center'},2:{cellWidth:35},3:{cellWidth:22,halign:'center'},4:{cellWidth:20,halign:'right'},5:{cellWidth:20,halign:'right'},6:{cellWidth:18,halign:'right'},7:{cellWidth:27,halign:'right'},8:{cellWidth:27,halign:'right'}},
-  didParseCell:data=>{if(data.section==='body'&&(data.column.index>=4)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
+  columnStyles:{0:{cellWidth:6,halign:'center'},1:{cellWidth:22,halign:'center'},2:{cellWidth:16,halign:'center'},3:{cellWidth:31},4:{cellWidth:19,halign:'center'},5:{cellWidth:18,halign:'right'},6:{cellWidth:18,halign:'right'},7:{cellWidth:16,halign:'right'},8:{cellWidth:22,halign:'right'},9:{cellWidth:22,halign:'right'}},
+  didParseCell:data=>{if(data.section==='body'&&(data.column.index>=5)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
  });
  const pages=doc.internal.getNumberOfPages();
  for(let page=1;page<=pages;page++){
