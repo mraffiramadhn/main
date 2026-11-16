@@ -245,9 +245,18 @@ $('exportPaymentPdf').onclick=()=>{
  if(!window.jspdf?.jsPDF){alert('Fitur PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.');return}
  const centerIndex=state.weeks.findIndex(w=>w.id===selectedWeek);
  if(centerIndex<0){alert('Pilih minggu acuan pada bagian Ketuntasan kas mingguan terlebih dahulu.');return}
- const offsets=[-5,-4,-3,-2,-1,0,1,2,3,4];
+ const offsets=[-4,-3,-2,-1,0,1,2,3,4];
  const periods=offsets.map(offset=>({offset,week:state.weeks[centerIndex+offset]||null}));
- const headers=['No. Absen','Nama Lengkap',...periods.map(p=>(p.week?.label||'Tidak tersedia')+'\\n(Week '+(p.offset>0?'+':'')+p.offset+')')];
+ const formatWeekRange=week=>{
+  const start=weekStart(week);if(!start)return 'Minggu tidak tersedia';
+  const from=new Date(start+'T00:00:00'),to=new Date(from);to.setDate(to.getDate()+4);
+  const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const a=from.getDate(),b=to.getDate(),ma=months[from.getMonth()],mb=months[to.getMonth()],ya=from.getFullYear(),yb=to.getFullYear();
+  if(ya!==yb)return a+' '+ma+' '+ya+' – '+b+' '+mb+' '+yb;
+  if(from.getMonth()!==to.getMonth())return a+' '+ma+' – '+b+' '+mb+' '+yb;
+  return a+'–'+b+' '+ma+' '+yb;
+ };
+ const headers=['No. Absen','Nama Lengkap',...periods.map(p=>formatWeekRange(p.week)+'\\nMinggu '+(p.offset>0?'+':'')+p.offset)];
  const body=state.students.map((s,i)=>[
   String(i+1),
   s.name,
@@ -272,7 +281,7 @@ $('exportPaymentPdf').onclick=()=>{
   margin:{left:10,right:10,top:23,bottom:12},
   styles:{font:'helvetica',fontSize:7,cellPadding:1.7,halign:'center',valign:'middle',lineColor:[160,160,160],lineWidth:0.15},
   headStyles:{fillColor:[36,54,78],textColor:255,fontStyle:'bold',fontSize:6.5},
-  columnStyles:{0:{cellWidth:13},1:{cellWidth:53}},
+  columnStyles:{0:{cellWidth:13},1:{cellWidth:53},2:{cellWidth:23},3:{cellWidth:23},4:{cellWidth:23},5:{cellWidth:23},6:{cellWidth:23},7:{cellWidth:23},8:{cellWidth:23},9:{cellWidth:23},10:{cellWidth:23}},
   didParseCell:data=>{if(data.section==='body'&&data.column.index>=2){const v=String(data.cell.raw);if(v==='LUNAS'){data.cell.styles.textColor=[20,110,75];data.cell.styles.fontStyle='bold'}else if(v==='BELUM'||v.startsWith('SISA')){data.cell.styles.textColor=[160,95,15]}}}
  });
  const pages=doc.internal.getNumberOfPages();
