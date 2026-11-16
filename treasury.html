@@ -257,7 +257,7 @@ $('exportPaymentPdf').onclick=()=>{
   if(from.getMonth()!==to.getMonth())return a+' '+ma+' – '+b+' '+mb+' '+yb;
   return a+'–'+b+' '+ma+' '+yb;
  };
- const headers=['No. Absen','Nama Lengkap',...periods.map(p=>formatWeekRange(p.week)+'\\nMinggu '+(p.offset>0?'+':'')+p.offset)];
+ const headers=['No. Absen','Nama Lengkap',...periods.map(p=>'Minggu '+(p.offset>0?'+':'')+p.offset)];
  const body=state.students.map((s,i)=>[
   String(i+1),
   s.name,
