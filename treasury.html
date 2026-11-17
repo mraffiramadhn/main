@@ -191,13 +191,13 @@ $('txEmpty').style.display=tx.length?'none':'block';$('txEmpty').textContent=all
 if(isEditor)$('txSearchCount').textContent='Menampilkan '+tx.length+' dari '+allTx.length+' transaksi.';
 $('txRows').querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=async()=>{if(!confirm('Hapus transaksi ini? Disarankan menambah transaksi koreksi agar riwayat tetap jelas.'))return;const transaction=state.transactions.find(t=>t.id===btn.dataset.delete);if(!transaction)return;const oldCash=Number(state.cash)||0,oldBank=Number(state.bank)||0;if(transaction.type==='transfer'){state[transaction.fromAccount]=Number(state[transaction.fromAccount]||0)+Number(transaction.amount||0);state[transaction.toAccount]=Number(state[transaction.toAccount]||0)-Number(transaction.amount||0)}state.transactions=state.transactions.filter(t=>t.id!==btn.dataset.delete);if(!await persist()){state.cash=oldCash;state.bank=oldBank;state.transactions.push(transaction);render()}});updateAccess()}
 function uid(){return crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)}
-$('loginToggle').onclick=()=>{$('loginBox').classList.toggle('open')};
-$('cancelLogin').onclick=()=>$('loginBox').classList.remove('open');
-$('loginBtn').onclick=async()=>{
- const button=$('loginBtn');button.disabled=true;setStatus('authStatus','Memeriksa akun…');
+let loginInProgress=false,autofillWatcher=null;
+async function performLogin(){
+ if(loginInProgress)return;
+ const button=$('loginBtn'),email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password)return;
+ loginInProgress=true;button.disabled=true;setStatus('authStatus','Memeriksa akun…');
  try{
-  const email=$('email').value.trim(),password=$('password').value;
-  if(!email||!password){setStatus('authStatus','Masukkan email dan password terlebih dahulu.');return}
   const {data,error}=await sb.auth.signInWithPassword({email,password});
   if(error){setStatus('authStatus','Login gagal: '+error.message);return}
   currentUser=data.user;
@@ -207,8 +207,29 @@ $('loginBtn').onclick=async()=>{
   $('loginBox').classList.remove('open');
   await loadState();const weeksChanged=ensureUpcomingWeeks();const idsChanged=ensureTransactionIds();if(weeksChanged||idsChanged)await persist();else render();
  }catch(e){setStatus('authStatus','Gagal memuat akses bendahara: '+(e?.message||String(e)))}
- finally{button.disabled=false}
-};
+ finally{loginInProgress=false;button.disabled=false}
+}
+function isAutofilled(input){
+ try{return input.matches(':autofill')||input.matches(':-webkit-autofill')}catch(e){return false}
+}
+function watchSavedPassword(){
+ if(autofillWatcher)clearInterval(autofillWatcher);
+ let checks=0;
+ autofillWatcher=setInterval(()=>{
+  checks++;
+  const email=$('email'),password=$('password');
+  if(email.value.trim()&&password.value&&
+     (isAutofilled(password)||isAutofilled(email))){
+   clearInterval(autofillWatcher);autofillWatcher=null;performLogin();return;
+  }
+  if(checks>=120||!$('loginBox').classList.contains('open')){
+   clearInterval(autofillWatcher);autofillWatcher=null;
+  }
+ },250);
+}
+$('loginToggle').onclick=()=>{ $('loginBox').classList.toggle('open');if($('loginBox').classList.contains('open'))watchSavedPassword();else if(autofillWatcher){clearInterval(autofillWatcher);autofillWatcher=null;} };
+$('cancelLogin').onclick=()=>{$('loginBox').classList.remove('open');if(autofillWatcher){clearInterval(autofillWatcher);autofillWatcher=null;}};
+$('loginBtn').onclick=performLogin;
 $('logoutBtn').onclick=async()=>{await sb.auth.signOut();currentUser=null;isEditor=false;isSuperadmin=false;updateAccess();setStatus('authStatus','Kamu sudah keluar.')};
 $('submitTransfer').onclick=async()=>{
  const amount=Number($('transferAmount').value);
