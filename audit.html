@@ -42,12 +42,12 @@ async function loadLogs(){
   const match=txs.find(t=>t.student===p.student&&String(t.time||'')===String(p.time||'')&&(!p.weeks?.length||p.weeks.includes(t.week)));
   return match?emailForTx(match):(String(p.admin||'').includes('@')?p.admin:'Email tidak tersedia (data lama)');
  };
- const paymentTxs=txs.filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas'));
+ const allTxs=txs; const paymentTxs=allTxs.filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas'));
  const getStudent=t=>{const direct=String(t.student||'').trim();if(direct)return direct;const category=String(t.category||'').trim();const fromCategory=category.match(/^Pembayaran Kas\s+(.+?)\s+[A-Za-zÀ-ÿ]+\s*-\s*\d+\s+Rp\s*[\d.,]+\s*$/i);if(fromCategory)return fromCategory[1].trim();const note=String(t.note||'').trim();const fromNote=note.match(/^Pembayaran Kas\s+(.+?)\s+[A-Za-zÀ-ÿ]+\s*-\s*\d+\s+Rp\s*[\d.,]+\s*$/i);if(fromNote)return fromNote[1].trim();const legacy=note.split(' · ')[0].trim();return legacy&&!/^(pembayaran tertagih|pembayaran minggu depan|pembayaran kas)$/i.test(legacy)?legacy:'Nama tidak tersedia';};
  const getWeek=t=>{if(t.week)return t.week;const category=String(t.category||'');const fromPaymentCategory=category.match(/\s+([A-Za-zÀ-ÿ]+\s*-\s*\d+)\s+Rp\s*[\d.,]+\s*$/i);if(fromPaymentCategory)return fromPaymentCategory[1].trim();const fromCategory=category.match(/·\s*(.+?)(?::\s*Rp|$)/i);if(fromCategory)return fromCategory[1].trim();const note=String(t.note||'');const fromNote=note.match(/([A-Za-zÀ-ÿ]+\s*-\s*\d+)\s*(?:Rp\s*[\d.,]+|$)/i);return fromNote?fromNote[1].trim():'—';};
  const cleanLabel=v=>String(v||'—').split(': Rp')[0].trim();
  const displayTime=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});};
- $('transactionRows').innerHTML=paymentTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
+ $('transactionRows').innerHTML=allTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
   const method=t.account==='bank'?'Rekening':'Tunai';
   const legacyNote=String(t.note||'').toLowerCase();const kind=t.mode==='future'||legacyNote.startsWith('pembayaran minggu depan')?'Pembayaran minggu depan':t.mode==='due'||legacyNote.startsWith('pembayaran tertagih')?'Pembayaran tertagih':'Pembayaran kas';
   const kindLabel=t.type==='income'?'Kredit':t.type==='expense'?'Debit':'Transfer';
@@ -67,7 +67,7 @@ async function loadLogs(){
  });
  $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.email||'Email tidak tersedia (data lama)')+'</td><td>'+esc(displayTime(p.time))+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
  $('rows').innerHTML=(audit.data||[]).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';
- status('logStatus',paymentTxs.length+' transaksi pembayaran · '+inputRows.length+' baris input kas · '+(audit.data||[]).length+' log administratif');
+ status('logStatus',allTxs.length+' transaksi · '+inputRows.length+' baris input kas · '+(audit.data||[]).length+' log administratif');
 }
 async function showIfAllowed(){if(!currentUser)return;const {data,error}=await sb.from('treasury_roles').select('role').eq('user_id',currentUser.id).maybeSingle();if(error||!data||!['admin','superadmin'].includes(data.role)){status('loginStatus','Akun ini tidak memiliki izin melihat log.');await sb.auth.signOut();currentUser=null;return} $('loginPanel').classList.add('hidden');$('logPanel').classList.remove('hidden');$('logout').classList.remove('hidden');await loadLogs()}
 $('login').onclick=async()=>{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){status('loginStatus','Login gagal: '+error.message);return}currentUser=data.user;await showIfAllowed()};
