@@ -202,6 +202,7 @@ async function performLogin(){
   if(error){setStatus('authStatus','Login gagal: '+error.message);return}
   currentUser=data.user;
   isEditor=await checkEditor(currentUser);
+  isSuperadmin=await checkSuperadmin(currentUser);
   if(!isEditor){setStatus('authStatus','Akun berhasil login, tetapi belum terdaftar sebagai bendahara.');await sb.auth.signOut();currentUser=null;updateAccess();return}
   updateAccess();setStatus('authStatus','Login berhasil. Formulir bendahara aktif.');
   $('loginBox').classList.remove('open');
@@ -401,7 +402,7 @@ $('exportJson').onclick=()=>{if(!requireExportAccess())return;download(JSON.stri
 function download(content,name,type){const blob=new Blob(['\ufeff',content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 $('resetData').onclick=async()=>{if(!confirm('Yakin reset semua transaksi, siswa, dan periode? Tindakan ini tidak dapat dibatalkan.'))return;state=structuredClone(DEFAULT);selectedWeek=null;if(await persist())setStatus('adminStatus','Data berhasil direset.')};
 $('txDate').value=today();$('transferDate').value=today();['txSearchQuery','txSearchDate','txSearchType'].forEach(id=>$(id).addEventListener('input',render));
-sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;isSuperadmin=false;updateAccess()}else if(session?.user){currentUser=session.user;queueMicrotask(async()=>{try{currentUser=session.user;isEditor=await checkEditor(currentUser);isSuperadmin=await checkSuperadmin(currentUser);updateAccess()}catch(e){console.error(e);setStatus('authStatus','Gagal memeriksa izin: '+(e?.message||String(e)))}})}});
+sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;updateAccess()}else if(session?.user){currentUser=session.user;queueMicrotask(async()=>{try{currentUser=session.user;isEditor=await checkEditor(currentUser);isSuperadmin=await checkSuperadmin(currentUser);updateAccess()}catch(e){console.error(e);setStatus('authStatus','Gagal memeriksa izin: '+(e?.message||String(e)))}})}});
 (async()=>{try{setStatus('authStatus','Menghubungkan ke Supabase…');const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session){currentUser=data.session.user;isEditor=await checkEditor(currentUser);isSuperadmin=await checkSuperadmin(currentUser)}await loadState();if(isEditor&&ensureTransactionIds())await persist();updateAccess();if(isEditor)setStatus('authStatus','Login bendahara aktif.')}catch(e){console.error(e);$('connection').textContent='Koneksi gagal';setStatus('authStatus','Gagal memuat: '+(e?.message||String(e)))}})();
 </script>
 </body></html>
