@@ -51,7 +51,10 @@ async function loadLogs(){
   const method=t.account==='bank'?'Rekening':'Tunai';
   const legacyNote=String(t.note||'').toLowerCase();const kind=t.mode==='future'||legacyNote.startsWith('pembayaran minggu depan')?'Pembayaran minggu depan':t.mode==='due'||legacyNote.startsWith('pembayaran tertagih')?'Pembayaran tertagih':'Pembayaran kas';
   const kindLabel=t.type==='income'?'Kredit':t.type==='expense'?'Debit':'Transfer';
-  return '<tr><td>'+esc(emailForTx(t))+'</td><td>'+kindLabel+'</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(displayTime(t.time||t.date))+'</td><td>'+esc(getStudent(t)+' · '+kind+' · '+cleanLabel(getWeek(t))+' · '+method)+'</td></tr>';
+  const subject=getStudent(t),weekLabel=cleanLabel(getWeek(t));
+  const context=subject==='Nama tidak tersedia'?(String(t.note||t.category||'Pembayaran kas').trim()):subject;
+  const details=[context,kind,weekLabel==='—'?'':weekLabel,method].filter(Boolean).join(' · ');
+  return '<tr><td>'+esc(emailForTx(t))+'</td><td>'+kindLabel+'</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(displayTime(t.time||t.date))+'</td><td>'+esc(details)+'</td></tr>';
  }).join('')||'<tr><td colspan="5">Belum ada transaksi pembayaran kas.</td></tr>';
  // Build input logs from the transaction records too, so existing payment transactions still appear even if paymentLogs is missing.
  const inputRows=[];
