@@ -8,7 +8,7 @@
 </style></head><body><main class="wrap">
 <header class="top"><div><div class="eyebrow">Treasury X1 · Audit Trail</div><h1>Log Aktivitas</h1><div class="muted">Catatan aktivitas yang tercatat di database.</div></div><div class="actions"><a href="treasury.html">Dashboard kas</a><a href="access.html">Kelola akses</a><button id="logout" class="hidden">Keluar</button></div></header>
 <section id="loginPanel" class="panel"><h2>Login administrator</h2><p>Log aktivitas hanya dapat dibaca administrator yang diizinkan.</p><div class="grid"><div><label>Email</label><input id="email" type="email" autocomplete="username" placeholder="Email akun"></div><div><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password akun"></div></div><div class="actions"><button id="login" class="primary">Login</button></div><div id="loginStatus" class="status"></div></section>
-<section id="logPanel" class="panel hidden"><div class="actions" style="justify-content:space-between"><div><h2>Riwayat audit</h2><p>Terbaru ditampilkan lebih dahulu.</p></div><button id="refresh" class="primary">Muat ulang</button></div><h2>Log Transaksi</h2><p>Setiap pembayaran kas tercatat satu baris per minggu sebesar Rp5.000 atau sesuai iuran siswa.</p><div class="tablewrap"><table><thead><tr><th>Admin</th><th>Transaksi</th><th>Nominal</th><th>Waktu</th><th>Keterangan</th></tr></thead><tbody id="transactionRows"></tbody></table></div><div style="height:18px"></div><h2>Log Input Kas</h2><p>Setiap input pembayaran mencatat administrator, waktu, periode, dan siswa.</p><div class="tablewrap"><table><thead><tr><th>Admin</th><th>Waktu</th><th>Minggu Pemb.</th><th>Nama Siswa</th></tr></thead><tbody id="paymentRows"></tbody></table></div><div style="height:18px"></div><h2>Log Aktivitas Database</h2><p>Riwayat perubahan administratif yang tercatat di audit database.</p><div class="tablewrap"><table><thead><tr><th>Waktu</th><th>Pelaku</th><th>Peran</th><th>Aktivitas</th><th>Detail</th></tr></thead><tbody id="rows"></tbody></table></div><div id="logStatus" class="status"></div></section>
+<section id="logPanel" class="panel hidden"><div class="actions" style="justify-content:space-between"><div><h2>Riwayat audit</h2><p>Terbaru ditampilkan lebih dahulu.</p></div><button id="refresh" class="primary">Muat ulang</button></div><h2>Log Transaksi</h2><p>Setiap pembayaran kas tercatat satu baris per minggu sebesar Rp5.000 atau sesuai iuran siswa.</p><div class="tablewrap"><table><thead><tr><th>Email Penginput</th><th>Jenis</th><th>Nominal</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody id="transactionRows"></tbody></table></div><div style="height:18px"></div><h2>Log Input Kas</h2><p>Setiap input pembayaran mencatat administrator, waktu, periode, dan siswa.</p><div class="tablewrap"><table><thead><tr><th>Email Penginput</th><th>Waktu</th><th>Minggu Pemb.</th><th>Nama Siswa</th></tr></thead><tbody id="paymentRows"></tbody></table></div><div style="height:18px"></div><h2>Log Aktivitas Database</h2><p>Riwayat perubahan administratif yang tercatat di audit database.</p><div class="tablewrap"><table><thead><tr><th>Waktu</th><th>Pelaku</th><th>Peran</th><th>Aktivitas</th><th>Detail</th></tr></thead><tbody id="rows"></tbody></table></div><div id="logStatus" class="status"></div></section>
 <div class="muted" style="font-size:12px">Log bersifat baca-saja dari halaman ini. Aktivitas yang belum dihubungkan ke audit database tidak akan muncul.</div>
 </main><script>
 const sb=window.supabase.createClient('https://ynrdhuhykzsuxsbauvkd.supabase.co','sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA');const $=id=>document.getElementById(id);let currentUser=null;
@@ -23,6 +23,25 @@ async function loadLogs(){
  if(audit.error){status('logStatus','Tidak dapat membaca log: '+audit.error.message);return}
  if(stateResult.error){status('logStatus','Tidak dapat membaca data kas: '+stateResult.error.message);return}
  const payload=stateResult.data?.payload||{},txs=Array.isArray(payload.transactions)?payload.transactions:[],payments=Array.isArray(payload.paymentLogs)?payload.paymentLogs:[];
+ // Recover the original inputter for legacy transactions from the audit snapshot
+ // where each transaction first appeared. New records store adminEmail directly.
+ const creatorEmailByTx=new Map();
+ const auditRows=(audit.data||[]).slice().sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));
+ for(const entry of auditRows){
+  const before=Array.isArray(entry.details?.before?.transactions)?entry.details.before.transactions:[];
+  const after=Array.isArray(entry.details?.after?.transactions)?entry.details.after.transactions:[];
+  const beforeIds=new Set(before.map(tx=>tx.id).filter(Boolean));
+  for(const tx of after){
+   if(tx?.id&&!beforeIds.has(tx.id)&&entry.actor_email&&!creatorEmailByTx.has(tx.id))
+    creatorEmailByTx.set(tx.id,entry.actor_email);
+  }
+ }
+ const emailForTx=t=>t.adminEmail||creatorEmailByTx.get(t.id)||(String(t.admin||'').includes('@')?t.admin:'Email tidak tersedia (data lama)');
+ const emailForPayment=p=>{
+  if(p.adminEmail)return p.adminEmail;
+  const match=txs.find(t=>t.student===p.student&&String(t.time||'')===String(p.time||'')&&(!p.weeks?.length||p.weeks.includes(t.week)));
+  return match?emailForTx(match):(String(p.admin||'').includes('@')?p.admin:'Email tidak tersedia (data lama)');
+ };
  const paymentTxs=txs.filter(t=>t.student||String(t.category||'').toLowerCase().includes('pembayaran kas'));
  const getStudent=t=>{const direct=String(t.student||'').trim();if(direct)return direct;const category=String(t.category||'').trim();const fromCategory=category.match(/^Pembayaran Kas\s+(.+?)\s+[A-Za-zÀ-ÿ]+\s*-\s*\d+\s+Rp\s*[\d.,]+\s*$/i);if(fromCategory)return fromCategory[1].trim();const note=String(t.note||'').trim();const fromNote=note.match(/^Pembayaran Kas\s+(.+?)\s+[A-Za-zÀ-ÿ]+\s*-\s*\d+\s+Rp\s*[\d.,]+\s*$/i);if(fromNote)return fromNote[1].trim();const legacy=note.split(' · ')[0].trim();return legacy&&!/^(pembayaran tertagih|pembayaran minggu depan|pembayaran kas)$/i.test(legacy)?legacy:'Nama tidak tersedia';};
  const getWeek=t=>{if(t.week)return t.week;const category=String(t.category||'');const fromPaymentCategory=category.match(/\s+([A-Za-zÀ-ÿ]+\s*-\s*\d+)\s+Rp\s*[\d.,]+\s*$/i);if(fromPaymentCategory)return fromPaymentCategory[1].trim();const fromCategory=category.match(/·\s*(.+?)(?::\s*Rp|$)/i);if(fromCategory)return fromCategory[1].trim();const note=String(t.note||'');const fromNote=note.match(/([A-Za-zÀ-ÿ]+\s*-\s*\d+)\s*(?:Rp\s*[\d.,]+|$)/i);return fromNote?fromNote[1].trim():'—';};
@@ -31,18 +50,19 @@ async function loadLogs(){
  $('transactionRows').innerHTML=paymentTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
   const method=t.account==='bank'?'Rekening':'Tunai';
   const legacyNote=String(t.note||'').toLowerCase();const kind=t.mode==='future'||legacyNote.startsWith('pembayaran minggu depan')?'Pembayaran minggu depan':t.mode==='due'||legacyNote.startsWith('pembayaran tertagih')?'Pembayaran tertagih':'Pembayaran kas';
-  return '<tr><td>'+esc(t.admin||'Administrator')+'</td><td>D</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(displayTime(t.time||t.date))+'</td><td>'+esc(getStudent(t)+' - '+kind+' - '+cleanLabel(getWeek(t))+' - '+method)+'</td></tr>';
+  const kindLabel=t.type==='income'?'Kredit':t.type==='expense'?'Debit':'Transfer';
+  return '<tr><td>'+esc(emailForTx(t))+'</td><td>'+kindLabel+'</td><td>Rp'+Number(t.amount||0).toLocaleString('id-ID')+'</td><td>'+esc(displayTime(t.time||t.date))+'</td><td>'+esc(getStudent(t)+' · '+kind+' · '+cleanLabel(getWeek(t))+' · '+method)+'</td></tr>';
  }).join('')||'<tr><td colspan="5">Belum ada transaksi pembayaran kas.</td></tr>';
  // Build input logs from the transaction records too, so existing payment transactions still appear even if paymentLogs is missing.
  const inputRows=[];
- payments.forEach(p=>(p.weeks||[]).forEach(w=>inputRows.push({admin:p.admin,time:p.time,week:w,student:p.student,id:p.id})));
+ payments.forEach(p=>(p.weeks||[]).forEach(w=>inputRows.push({email:emailForPayment(p),time:p.time,week:w,student:p.student,id:p.id})));
  const seen=new Set(inputRows.map(p=>[p.time,p.student,p.week].join('|')));
  paymentTxs.forEach(t=>{
-  const row={admin:t.admin,time:t.time||t.date,week:getWeek(t),student:getStudent(t)};
+  const row={email:emailForTx(t),time:t.time||t.date,week:getWeek(t),student:getStudent(t)};
   const key=[row.time,row.student,row.week].join('|');
   if(!seen.has(key)){inputRows.push(row);seen.add(key)}
  });
- $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.admin||'Administrator')+'</td><td>'+esc(displayTime(p.time))+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
+ $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.email||'Email tidak tersedia (data lama)')+'</td><td>'+esc(displayTime(p.time))+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
  $('rows').innerHTML=(audit.data||[]).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';
  status('logStatus',paymentTxs.length+' transaksi pembayaran · '+inputRows.length+' baris input kas · '+(audit.data||[]).length+' log administratif');
 }
