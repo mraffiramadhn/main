@@ -47,7 +47,18 @@ async function loadLogs(){
  const getWeek=t=>{if(t.week)return t.week;const category=String(t.category||'');const fromPaymentCategory=category.match(/\s+([A-Za-zÀ-ÿ]+\s*-\s*\d+)\s+Rp\s*[\d.,]+\s*$/i);if(fromPaymentCategory)return fromPaymentCategory[1].trim();const fromCategory=category.match(/·\s*(.+?)(?::\s*Rp|$)/i);if(fromCategory)return fromCategory[1].trim();const note=String(t.note||'');const fromNote=note.match(/([A-Za-zÀ-ÿ]+\s*-\s*\d+)\s*(?:Rp\s*[\d.,]+|$)/i);return fromNote?fromNote[1].trim():'—';};
  const cleanLabel=v=>String(v||'—').split(': Rp')[0].trim();
  const displayTime=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});};
- $('transactionRows').innerHTML=allTxs.slice().sort((a,b)=>String(b.time||b.date||'').localeCompare(String(a.time||a.date||''))).map(t=>{
+ // IDs follow PREFIX-DDMMYY/SEQUENCE; use the embedded date and sequence for chronological ordering.
+ const transactionOrder=t=>{
+  const m=String(t.transactionId||'').match(/^[A-Z]+-([0-9]{2})([0-9]{2})([0-9]{2})\/([0-9]+)$/i);
+  if(m){const day=Number(m[1]),month=Number(m[2]),year=2000+Number(m[3]);return {key:Date.UTC(year,month-1,day),seq:Number(m[4])};}
+  const d=new Date(t.time||t.date||0);
+  return {key:Number.isNaN(d.getTime())?0:d.getTime(),seq:0};
+ };
+ const newestFirst=(a,b)=>{
+  const x=transactionOrder(a),y=transactionOrder(b);
+  return (y.key-x.key)||(y.seq-x.seq)||String(b.time||b.date||'').localeCompare(String(a.time||a.date||''));
+ };
+ $('transactionRows').innerHTML=allTxs.slice().sort(newestFirst).map(t=>{
   const method=t.account==='bank'?'Rekening':'Tunai';
   const legacyNote=String(t.note||'').toLowerCase();const kind=t.mode==='future'||legacyNote.startsWith('pembayaran minggu depan')?'Pembayaran minggu depan':t.mode==='due'||legacyNote.startsWith('pembayaran tertagih')?'Pembayaran tertagih':'Pembayaran kas';
   const kindLabel=t.type==='income'?'Kredit':t.type==='expense'?'Debit':'Transfer';
@@ -66,7 +77,7 @@ async function loadLogs(){
   if(!seen.has(key)){inputRows.push(row);seen.add(key)}
  });
  $('paymentRows').innerHTML=inputRows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||''))).map(p=>'<tr><td>'+esc(p.email||'Email tidak tersedia (data lama)')+'</td><td>'+esc(displayTime(p.time))+'</td><td>'+esc(p.week||'—')+'</td><td>'+esc(p.student||'—')+'</td></tr>').join('')||'<tr><td colspan="4">Belum ada input kas tercatat.</td></tr>';
- $('rows').innerHTML=(audit.data||[]).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';
+ $('rows').innerHTML=(audit.data||[]).slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(x=>'<tr><td>'+new Date(x.created_at).toLocaleString('id-ID')+'</td><td>'+esc(x.actor_email||'Sistem')+'</td><td><span class="tag">'+esc(x.actor_role||'system')+'</span></td><td>'+esc(x.action)+'</td><td><pre>'+esc(JSON.stringify(x.details||{},null,2))+'</pre></td></tr>').join('')||'<tr><td colspan="5">Belum ada aktivitas administratif tercatat.</td></tr>';
  status('logStatus',allTxs.length+' transaksi · '+inputRows.length+' baris input kas · '+(audit.data||[]).length+' log administratif');
 }
 async function showIfAllowed(){if(!currentUser)return;const {data,error}=await sb.from('treasury_roles').select('role').eq('user_id',currentUser.id).maybeSingle();if(error||!data||!['admin','superadmin'].includes(data.role)){status('loginStatus','Akun ini tidak memiliki izin melihat log.');await sb.auth.signOut();currentUser=null;return} $('loginPanel').classList.add('hidden');$('logPanel').classList.remove('hidden');$('logout').classList.remove('hidden');await loadLogs()}
