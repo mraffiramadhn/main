@@ -206,6 +206,63 @@ th{letter-spacing:.025em}
  .top-actions a,.top-actions .pill,.top-actions button{min-height:36px!important;padding:8px 10px!important;font-size:12px!important}
 }
 
+
+/* Mobile refinement: cleaner header, cards, forms and transaction history */
+@media (max-width: 600px) {
+  .wrap { padding: 16px 12px 34px; }
+  .top { gap: 13px; padding-bottom: 16px; margin-bottom: 16px; }
+  .top > div:first-child { width: 100%; flex: 1 1 100%; }
+  .eyebrow { font-size: 9px; letter-spacing: .14em; line-height: 1.5; }
+  .top h1 { font-size: 27px; line-height: 1.15; margin: 6px 0; }
+  .top .sub { max-width: 34ch; font-size: 12px; line-height: 1.5; }
+  .top-actions {
+    width: 100%; flex: 1 1 100%; display: grid!important;
+    grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px!important;
+    justify-content: stretch!important; align-items: stretch!important;
+  }
+  .top-actions .pill {
+    grid-column: 1 / -1; width: 100%; min-height: 38px!important;
+    justify-content: flex-start!important; padding: 9px 12px!important;
+    font-size: 12px!important;
+  }
+  .top-actions a, .top-actions button {
+    width: 100%; min-width: 0; min-height: 42px!important;
+    padding: 9px 8px!important; font-size: 12px!important;
+    line-height: 1.25!important; text-align: center; white-space: normal!important;
+    overflow-wrap: anywhere;
+  }
+  .stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; margin: 14px 0; }
+  .stat { min-height: 112px; padding: 13px 11px; border-radius: 14px; }
+  .stat .label { font-size: 10px; letter-spacing: .035em; line-height: 1.4; }
+  .stat .value { font-size: clamp(17px,4.7vw,22px); line-height: 1.2; margin-top: 8px; }
+  .stat .hint { font-size: 10px; line-height: 1.4; margin-top: 6px; }
+  .panel { padding: 14px 12px; margin-bottom: 12px; border-radius: 15px; }
+  .panel h2 { font-size: 17px; }
+  .panel-head { gap: 8px; margin-bottom: 12px; }
+  .panel-head p { font-size: 11px; line-height: 1.45; }
+  .tx-pagination-top { flex-wrap: wrap; gap: 7px; font-size: 11px; }
+  .tx-pagination-top select { min-height: 38px; }
+  .tx-pagination-bottom { flex-wrap: wrap; gap: 7px; }
+  .tx-pagination-bottom button { min-height: 36px; }
+  .tablewrap { border-radius: 10px; }
+  .tablewrap table { min-width: 500px; }
+  .tablewrap th, .tablewrap td { padding: 10px 9px; font-size: 11px; }
+  .formgrid { gap: 9px; }
+  .actions { gap: 7px; }
+  .actions button { min-height: 40px; }
+  .loginbox { padding: 13px; border-radius: 14px; }
+}
+@media (max-width: 380px) {
+  .wrap { padding-left: 10px; padding-right: 10px; }
+  .top h1 { font-size: 24px; }
+  .top-actions { gap: 6px!important; }
+  .top-actions a, .top-actions button { font-size: 11px!important; padding: 8px 6px!important; }
+  .stats { gap: 7px; }
+  .stat { min-height: 104px; padding: 10px 9px; }
+  .stat .value { font-size: 16px; }
+  .panel { padding: 12px 10px; }
+}
+
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="eyebrow">Class finance · transparent & accountable</div><h1>💸 Treasury <span id="classTitle">X1</span></h1><div class="sub">Pusat transparansi kas kelas · data publik, pengelolaan terbatas</div></div><div class="top-actions"><span class="pill" id="connection">Menghubungkan…</span><a href="/lsh-treasury/" style="color:var(--cyan);align-self:center">Laporan Saldo Harian</a><a id="accessMenu" href="/access.html" style="display:none;color:var(--cyan);align-self:center">Kelola akses</a><a id="auditMenu" href="/audit.html" style="display:none;color:var(--cyan);align-self:center">Log aktivitas</a><button id="loginToggle">Login bendahara</button><button id="logoutBtn" style="display:none">Keluar</button></div></header>
