@@ -501,7 +501,7 @@ $('exportPdf').onclick=()=>{
  const body=transactions.map((t,i)=>{
   const balance=transactionBalances[t.id]||{opening:0,ending:0};
   return [
-   String(transactions.length-i),
+   String(transactions.length-i).padStart(3,'0'),
    t.transactionId||'—',
    dateLabel(t.date),
    [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
