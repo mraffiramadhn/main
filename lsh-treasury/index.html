@@ -5,15 +5,15 @@
 <meta name="theme-color" content="#0b1220">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 <title>Laporan Saldo Harian — Treasury X1</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root{color-scheme:dark;--bg:#0b1220;--panel:#121c2e;--line:#26364e;--text:#edf4ff;--muted:#9aabc4;--cyan:#5eead4;--green:#86efac;--red:#fda4af}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#142b48 0,transparent 44%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1180px;margin:auto;padding:26px 16px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}.eyebrow{color:var(--cyan);font-size:11px;letter-spacing:.17em;text-transform:uppercase;font-weight:800}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-.04em;margin:4px 0}.muted{color:var(--muted)}a{color:var(--cyan);text-decoration:none}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:12px;color:var(--muted)}.panel,.stat{background:linear-gradient(145deg,var(--panel),#101a2b);border:1px solid var(--line);border-radius:16px;padding:17px;min-width:0}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.label{font-size:12px;color:var(--muted)}.value{font-size:clamp(18px,2.5vw,26px);font-weight:800;margin-top:6px;overflow-wrap:anywhere}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:right;padding:12px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}th{color:var(--muted);font-weight:700;background:#101a2a}th:first-child,td:first-child{text-align:left}tr:last-child td{border-bottom:0}.credit{color:var(--green)}.debit{color:var(--red)}.notice{font-size:12px;color:var(--muted);border-left:2px solid var(--cyan);padding-left:10px;margin-top:13px}.empty{text-align:center;padding:24px;color:var(--muted)}.footer{font-size:12px;color:var(--muted);margin-top:20px}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#142b48 0,transparent 44%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1180px;margin:auto;padding:26px 16px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}.eyebrow{color:var(--cyan);font-size:11px;letter-spacing:.17em;text-transform:uppercase;font-weight:800}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-.04em;margin:4px 0}.muted{color:var(--muted)}a{color:var(--cyan);text-decoration:none}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:12px;color:var(--muted)}.export-btn{border:1px solid #2c8174;border-radius:10px;padding:9px 13px;background:#123b36;color:#a7f3d0;font:inherit;font-size:13px;font-weight:750;cursor:pointer}.export-btn:disabled{opacity:.45;cursor:not-allowed}.header-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.panel,.stat{background:linear-gradient(145deg,var(--panel),#101a2b);border:1px solid var(--line);border-radius:16px;padding:17px;min-width:0}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.label{font-size:12px;color:var(--muted)}.value{font-size:clamp(18px,2.5vw,26px);font-weight:800;margin-top:6px;overflow-wrap:anywhere}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:right;padding:12px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}th{color:var(--muted);font-weight:700;background:#101a2a}th:first-child,td:first-child{text-align:left}tr:last-child td{border-bottom:0}.credit{color:var(--green)}.debit{color:var(--red)}.notice{font-size:12px;color:var(--muted);border-left:2px solid var(--cyan);padding-left:10px;margin-top:13px}.empty{text-align:center;padding:24px;color:var(--muted)}.footer{font-size:12px;color:var(--muted);margin-top:20px}
 @media(max-width:650px){.wrap{padding:17px 11px 32px}.stats{grid-template-columns:1fr 1fr;gap:8px}.stat,.panel{padding:12px}.stat:last-child{grid-column:1/-1}.value{font-size:19px}.top{align-items:flex-start}}
 </style>
 </head>
 <body><main class="wrap">
-<header class="top"><div><div class="eyebrow">Treasury · Financial statement</div><h1>📊 Laporan Saldo Harian</h1><div class="muted">Kas Kelas X-1 · Ringkasan debit, kredit, dan saldo harian</div></div><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><span class="pill" id="status">Menghubungkan…</span><a href="/treasury/">← Kembali ke Treasury</a></div></header>
+<header class="top"><div><div class="eyebrow">Treasury · Financial statement</div><h1>📊 Laporan Saldo Harian</h1><div class="muted">Kas Kelas X-1 · Ringkasan debit, kredit, dan saldo harian</div></div><div class="header-actions"><span class="pill" id="status">Menghubungkan…</span><button class="export-btn" id="exportPdf" type="button" disabled>↓ Ekspor PDF</button><a href="/treasury/">← Kembali ke Treasury</a></div></header>
 <section class="stats">
 <div class="stat"><div class="label">SALDO AKHIR TERBARU</div><div class="value" id="latestBalance">—</div></div>
 <div class="stat"><div class="label">TOTAL KREDIT · PEMASUKAN</div><div class="value credit" id="totalCredit">—</div></div>
@@ -30,6 +30,7 @@ const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
+let latestReport=null;
 const money=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
 const dateNow=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const dateLabel=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric',timeZone:'UTC'})};
@@ -62,12 +63,26 @@ async function load(){
  try{
   const {data,error}=await sb.from('treasury_state').select('payload,updated_at').eq('id',true).maybeSingle();
   if(error)throw error;if(!data)throw new Error('Data Treasury belum tersedia.');
-  const report=buildReport(data.payload||{});
+  const report=buildReport(data.payload||{});latestReport=report;$("exportPdf").disabled=!report.rows.length;
   $('latestBalance').textContent=report.rows.length?money(report.rows[report.rows.length-1].ending):'—';
   $('totalCredit').textContent=money(report.creditAll);$('totalDebit').textContent=money(report.debitAll);
   $('rows').innerHTML=report.rows.length?report.rows.slice().reverse().map(r=>'<tr><td>'+dateLabel(r.date)+'</td><td>'+money(r.opening)+'</td><td class="debit">'+(r.debit?money(r.debit):'—')+'</td><td class="credit">'+(r.credit?money(r.credit):'—')+'</td><td><strong>'+money(r.ending)+'</strong></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada laporan yang selesai settlement.</td></tr>';
   $('status').textContent='Data diperbarui · '+new Date(data.updated_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
  }catch(e){console.error(e);$('status').textContent='Gagal memuat';$('rows').innerHTML='<tr><td colspan="5" class="empty">'+String(e.message||e)+'</td></tr>'}
 }
+function exportPdf(){
+ if(!latestReport||!latestReport.rows.length){alert('Belum ada data LSH yang dapat diekspor.');return}
+ if(!window.jspdf||!window.jspdf.jsPDF){alert('Komponen PDF belum termuat. Muat ulang halaman.');return}
+ const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+ const rows=latestReport.rows.slice().reverse(),first=rows[rows.length-1].date,last=rows[0].date;
+ const fmt=n=>'Rp '+new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n)||0);
+ doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(20,38,60);doc.text('LAPORAN SALDO HARIAN',14,17);
+ doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(85,100,120);doc.text('Treasury X-1 · Kas Kelas',14,23);doc.text('Periode: '+dateLabel(first)+' – '+dateLabel(last),14,29);doc.text('Diekspor: '+new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})+' WIB',14,35);
+ doc.autoTable({startY:42,head:[['Tanggal','Saldo Awal','Debit','Kredit','Saldo Akhir']],body:rows.map(r=>[dateLabel(r.date),fmt(r.opening),r.debit?fmt(r.debit):'—',r.credit?fmt(r.credit):'—',fmt(r.ending)]),theme:'grid',styles:{font:'helvetica',fontSize:8,cellPadding:2.5,textColor:[35,48,65]},headStyles:{fillColor:[20,43,65],textColor:[255,255,255]},alternateRowStyles:{fillColor:[245,248,251]},margin:{left:14,right:14}});
+ let y=doc.lastAutoTable.finalY+9;if(y>180){doc.addPage();y=18}doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(35,48,65);doc.text('Total Kredit: '+fmt(latestReport.creditAll),14,y);doc.text('Total Debit: '+fmt(latestReport.debitAll),100,y);
+ const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFontSize(8);doc.setTextColor(130,140,150);doc.text('Halaman '+p+' dari '+pages,283,202,{align:'right'})}
+ doc.save('LSH-Treasury-X1-'+last+'.pdf');
+}
+$("exportPdf").addEventListener("click",exportPdf);
 load();
 </script></body></html>
