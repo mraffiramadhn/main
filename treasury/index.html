@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
+<title>Treasury X1 — Kas Kelas</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+.editoronly.editoronly-cell.show,.editoronly.editoronly-header.show{display:table-cell!important}
+:root{color-scheme:dark;--bg:#0b1220;--panel:#121c2e;--panel2:#17243a;--line:#26364e;--text:#edf4ff;--muted:#9aabc4;--cyan:#5eead4;--blue:#7dd3fc;--red:#fda4af;--green:#86efac;--amber:#fcd34d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#142b48 0,transparent 44%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #35516d;border-radius:10px;padding:10px 13px;background:#1d3550;color:var(--text);font-weight:700}button.primary{background:var(--cyan);color:#06251f;border-color:var(--cyan)}button.danger{border-color:#75414b;color:var(--red);background:#351f2a}button:disabled{opacity:.5;cursor:not-allowed}input,select{width:100%;background:#0d1727;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;min-width:0}label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.wrap{max-width:1180px;margin:auto;padding:26px 16px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}.eyebrow{color:var(--cyan);font-size:11px;letter-spacing:.17em;text-transform:uppercase;font-weight:800}.top h1{font-size:clamp(28px,4vw,40px);letter-spacing:-.04em;margin:4px 0}.sub,.muted{color:var(--muted)}.top-actions{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:12px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.stat,.panel{background:linear-gradient(145deg,var(--panel),#101a2b);border:1px solid var(--line);border-radius:16px;padding:17px;min-width:0}.stat .label{color:var(--muted);font-size:12px}.stat .value{font-size:clamp(18px,2.5vw,27px);font-weight:800;letter-spacing:-.035em;margin-top:6px;overflow-wrap:anywhere}.stat .hint{font-size:12px;color:var(--muted);margin-top:4px}.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}.panel{margin-bottom:14px}.panel h2{font-size:18px;margin:0 0 5px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}.panel-head p{margin:0;color:var(--muted);font-size:13px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px}.tx-pagination-top{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:12px;color:var(--muted)}.tx-pagination-top label{margin:0}.tx-pagination-top select{width:auto;min-width:78px;padding:7px 9px;font-size:12px}.tx-pagination-bottom{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px}.tx-pagination-bottom button{padding:7px 10px;font-size:12px}.tx-pagination-bottom #txPageInfo{font-size:12px}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}th{color:var(--muted);font-weight:700;background:#101a2a}tr:last-child td{border-bottom:0}.income{color:var(--green)}.expense{color:var(--red)}.empty{padding:20px;text-align:center;color:var(--muted)}.week-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 14px}.week-tab{padding:7px 10px;font-size:12px}.week-tab.active{background:var(--cyan);color:#06251f;border-color:var(--cyan)}.progress{height:7px;background:#24344a;border-radius:99px;overflow:hidden;margin:9px 0}.progress span{display:block;height:100%;background:var(--cyan);width:0}.studentrow{display:grid;grid-template-columns:minmax(130px,1fr) 100px;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.studentrow:last-child{border-bottom:0}.check{display:flex;justify-content:flex-end;align-items:center;gap:8px;color:var(--muted);font-size:12px}.check input{width:19px;height:19px;accent-color:var(--cyan)}.tag{display:inline-block;border-radius:99px;padding:3px 8px;font-size:11px;font-weight:700}.paid{background:#12382f;color:var(--green)}.unpaid{background:#3b2e1b;color:var(--amber)}.status{font-size:12px;color:var(--muted);margin-top:8px;min-height:18px}.loginbox{display:none;border:1px solid #42627e;background:#101d30;border-radius:13px;padding:14px;margin:12px 0}.loginbox.open{display:block}.editoronly{display:none}.editoronly.show{display:block}.export-control.show{display:inline-block}.footer{font-size:12px;color:var(--muted);margin-top:20px}.notice{font-size:12px;color:var(--muted);border-left:2px solid var(--cyan);padding-left:10px;margin-top:12px}
+
+/* Responsive layout: keep every grid item inside the viewport */
+.layout,.layout>div,.panel,.panel-head,.formgrid,.field,#paymentRows,.tablewrap{min-width:0;max-width:100%}
+.layout>div{width:100%}
+@media(max-width:780px){
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .layout{grid-template-columns:minmax(0,1fr)}
+ .wrap{padding:18px 12px 36px}
+ .stat,.panel{padding:14px}
+}
+@media(max-width:600px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ body{font-size:14px}
+ .wrap{width:100%;max-width:100%;padding:12px 10px 28px;overflow-x:clip}
+ .top{align-items:flex-start;gap:10px;margin-bottom:14px}
+ .top>div:first-child{min-width:0}
+ .top h1{font-size:25px;line-height:1.2}
+ .sub{font-size:12px}
+ .top-actions{width:100%;display:flex;flex-wrap:wrap;gap:6px}
+ .top-actions button,.top-actions a{font-size:12px;padding:8px 10px}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+ .stat{min-width:0;padding:10px;border-radius:12px}
+ .stat .label{font-size:10px;line-height:1.35}
+ .stat .value{font-size:clamp(16px,4.5vw,21px);line-height:1.2;overflow-wrap:anywhere}
+ .stat .hint{font-size:10px}
+ .panel{width:100%;min-width:0;padding:11px;margin:0 0 10px;border-radius:12px}
+ .panel h2{font-size:16px}
+ .panel-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+ .panel-head p{font-size:11px}
+ .panel-head button{font-size:11px;padding:7px 9px}
+ .formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .field,.formgrid>div{min-width:0}
+ .field.full{grid-column:1/-1}
+ label{font-size:11px}
+ input,select{width:100%;min-width:0;max-width:100%;font-size:14px;padding:9px 10px;min-height:40px}
+ .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+ .actions button{font-size:12px;padding:8px 10px;min-height:36px}
+ .week-tabs{display:flex;flex-wrap:nowrap;max-width:100%;overflow-x:auto;gap:6px;padding:2px 0 7px;scrollbar-width:thin}
+ .week-tab{flex:0 0 auto;font-size:11px;padding:7px 9px}
+ /* Transaction history: scroll inside its own wrapper, never widen the page */
+ #txRows{display:table-row-group}
+ #txRows tr{display:table-row}
+ #txRows td{display:table-cell;white-space:nowrap;padding:8px;font-size:11px}
+ .tablewrap{display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:10px;-webkit-overflow-scrolling:touch}
+ .tablewrap table{width:max-content;min-width:520px;border-collapse:collapse}
+ .tablewrap th,.tablewrap td{white-space:nowrap}
+ /* Weekly roster: compact cards sized to the phone width */
+ #paymentRows .tablewrap{display:block;width:100%;overflow:visible;border:0}
+ #paymentRows .tablewrap table,#paymentRows .tablewrap table[style]{display:block;width:100%;min-width:0!important;table-layout:fixed}
+ #paymentRows .tablewrap thead{display:none}
+ #paymentRows .tablewrap tbody{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}
+ #paymentRows .tablewrap tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;width:100%;min-width:0;padding:8px 10px;background:#0e1929;border:1px solid var(--line);border-radius:10px}
+ #paymentRows .tablewrap td{display:block;min-width:0;white-space:normal;text-align:left;padding:5px 0;border:0;font-size:11px;overflow-wrap:anywhere}
+ #paymentRows .tablewrap td:first-child{grid-column:1/-1;font-size:13px;font-weight:750;color:var(--text);padding:2px 0 7px;margin-bottom:3px;border-bottom:1px solid var(--line)}
+ #paymentRows .tablewrap td:nth-child(2),#paymentRows .tablewrap td:nth-child(3){text-align:left}
+ #paymentRows .tablewrap td:before{display:block;content:attr(data-label);font-size:10px;line-height:1.3;color:var(--muted);font-weight:600;margin-bottom:3px}
+ #paymentRows .tablewrap td>div{max-width:100%;font-size:10px!important;line-height:1.35}
+ .notice,.footer{font-size:10px}
+}
+@media(max-width:380px){
+ .formgrid{grid-template-columns:minmax(0,1fr)}
+ .field.full{grid-column:auto}
+ .stats{gap:6px}
+ .stat{padding:9px}
+ .stat .value{font-size:16px}
+ .panel{padding:10px}
+}
+
+/* Final mobile containment and proportional sizing */
+@media (max-width: 780px) {
+  .layout { grid-template-columns: minmax(0, 1fr) !important; }
+  .layout > div { min-width: 0 !important; width: 100%; }
+  .panel, .stat, .panel-head, .panel-head > div { min-width: 0; }
+  .panel-head { flex-wrap: wrap; }
+  .panel-head > div { flex: 1 1 180px; }
+  .tablewrap { max-width: 100%; }
+}
+@media (max-width: 600px) {
+  html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .wrap { width: 100%; max-width: 100%; padding: 12px 10px 28px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat { overflow: hidden; padding: 10px; }
+  .stat .value { font-size: clamp(16px, 4.3vw, 21px); }
+  .panel { width: 100%; padding: 11px; }
+  .formgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .formgrid > *, .field { min-width: 0; }
+  input, select { min-width: 0; max-width: 100%; }
+  .actions { align-items: stretch; }
+  .actions button { flex: 0 1 auto; min-width: 0; }
+  .tablewrap { width: 100%; overflow-x: auto; }
+  .tablewrap table { width: max-content; min-width: 520px; }
+  #paymentRows .tablewrap { overflow: visible; }
+  #paymentRows .tablewrap table,
+  #paymentRows .tablewrap table[style] {
+    display: block; width: 100%; min-width: 0 !important; table-layout: fixed;
+  }
+  #paymentRows .tablewrap tbody {
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px;
+  }
+  #paymentRows .tablewrap tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%; min-width: 0; gap: 0 10px;
+  }
+  #paymentRows .tablewrap td {
+    min-width: 0; white-space: normal; overflow-wrap: anywhere;
+    text-align: left !important;
+  }
+  #paymentRows .tablewrap td:first-child { grid-column: 1 / -1; }
+  #paymentRows .tablewrap td:nth-child(2),
+  #paymentRows .tablewrap td:nth-child(3) { text-align: left !important; }
+}
+@media (max-width: 380px) {
+  .formgrid { grid-template-columns: minmax(0, 1fr); }
+  .field.full { grid-column: auto; }
+  .stats { gap: 6px; }
+  .stat { padding: 9px; }
+  .panel { padding: 10px; }
+}
+</style></head>
+<body><main class="wrap">
+<header class="top"><div><div class="eyebrow">Class finance · transparent & accountable</div><h1>💸 Treasury <span id="classTitle">X1</span></h1><div class="sub">Pusat transparansi kas kelas · data publik, pengelolaan terbatas</div></div><div class="top-actions"><a href="/lsh-treasury/" style="color:var(--cyan);align-self:center">Laporan Saldo Harian</a><span class="pill" id="connection">Menghubungkan…</span><a id="accessMenu" href="/access.html" style="display:none;color:var(--cyan);align-self:center">Kelola akses</a><a id="auditMenu" href="/audit.html" style="display:none;color:var(--cyan);align-self:center">Log aktivitas</a><button id="loginToggle">Login bendahara</button><button id="logoutBtn" style="display:none">Keluar</button></div></header>
+<section id="loginBox" class="loginbox"><h2 style="margin:0 0 10px">Akses bendahara</h2><div class="formgrid"><div class="field full"><label>Email</label><input id="email" type="email" autocomplete="username" placeholder="Email akun bendahara"></div><div class="field full"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password akun"></div></div><div class="actions"><button class="primary" id="loginBtn">Login</button><button id="cancelLogin">Tutup</button><a href="/register.html" style="align-self:center;color:var(--cyan);font-size:13px">Belum punya akun? Daftar</a></div><div class="status" id="authStatus">Hanya akun yang diberi izin bendahara yang dapat mengedit.</div></section>
+<section class="stats">
+<div class="stat"><div class="label">TOTAL KAS</div><div class="value" id="total">Rp0</div><div class="hint">Tunai + rekening</div></div>
+<div class="stat"><div class="label">KAS TUNAI</div><div class="value" id="cashTotal">Rp0</div><div class="hint">Uang fisik di bendahara</div></div>
+<div class="stat"><div class="label">KAS DI REKENING</div><div class="value" id="bankTotal">Rp0</div><div class="hint">Saldo rekening kas</div></div>
+<div class="stat"><div class="label">KETUNTASAN MINGGU INI</div><div class="value" id="completion">0%</div><div class="hint" id="completionHint">Belum ada data siswa</div><div class="progress"><span id="progressBar"></span></div></div>
+</section>
+<div class="layout"><div>
+<section class="panel"><div class="panel-head"><div><h2>Mutasi kas</h2><p>Riwayat pemasukan dan pengeluaran</p></div><button id="exportCsv" class="editoronly export-control">Ekspor CSV</button><button id="exportPdf" class="primary editoronly export-control" type="button">Ekspor Mutasi PDF</button></div><div class="editoronly" id="transactionForm"><div class="formgrid"><div><label>Tanggal</label><input id="txDate" type="date"></div><div><label>Jenis mutasi</label><select id="txType"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div><div><label>Kategori / keterangan</label><input id="txCategory" placeholder="Contoh: Iuran kas"></div><div><label>Nominal (Rp)</label><input id="txAmount" type="number" min="1" step="1" placeholder="5000"></div><div><label>Sumber / tujuan</label><select id="txAccount"><option value="cash">Tunai</option><option value="bank">Rekening</option></select></div><div><label>Catatan (opsional)</label><input id="txNote" placeholder="Keterangan tambahan"></div></div><div class="actions"><button class="primary" id="addTx">Tambah mutasi</button></div><div class="status" id="txStatus"></div></div><section class="panel editoronly" id="transferForm"><div class="panel-head"><div><h3>Transfer antar-akun kas</h3><p>Pindahkan saldo antara tunai dan rekening tanpa mengubah total kas.</p></div></div><div class="formgrid"><div><label>Tanggal transfer</label><input id="transferDate" type="date"></div><div><label>Arah transfer</label><select id="transferDirection"><option value="cash_to_bank">Tunai → Rekening</option><option value="bank_to_cash">Rekening → Tunai</option></select></div><div><label>Nominal (Rp)</label><input id="transferAmount" type="number" min="1" step="1" placeholder="100000"></div><div><label>Catatan (opsional)</label><input id="transferNote" placeholder="Contoh: Setor uang kas ke rekening"></div></div><div class="actions"><button class="primary" id="submitTransfer" type="button">Simpan transfer</button></div><div class="status" id="transferStatus"></div></section><div class="editoronly" id="transactionSearch" style="margin:12px 0"><div class="formgrid"><div class="field full"><label>Cari transaksi (ID, keterangan, atau nama siswa)</label><input id="txSearchQuery" type="search" placeholder="Contoh: DB-151126/001 atau nama siswa"></div><div><label>Filter tanggal</label><input id="txSearchDate" type="date"></div><div><label>Jenis transaksi</label><select id="txSearchType"><option value="all">Semua transaksi</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option><option value="transfer">Transfer</option></select></div></div><div class="muted" id="txSearchCount" style="font-size:11px;margin-top:6px"></div></div><div class="tx-pagination-top"><label for="txPageSize">Tampilkan</label><select id="txPageSize" aria-label="Jumlah mutasi per halaman"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="all">Semua</option></select><span class="muted">mutasi per halaman</span></div><div class="tablewrap"><table><thead><tr><th class="editoronly editoronly-header">ID Transaksi</th><th>Tanggal</th><th>Mutasi</th><th>Akun</th><th>Nominal</th><th>Saldo gabungan</th><th></th></tr></thead><tbody id="txRows"></tbody></table></div><div class="empty" id="txEmpty">Belum ada mutasi kas.</div><div class="tx-pagination-bottom" id="txPagination"><button id="txPrev" type="button">Sebelumnya</button><span id="txPageInfo" class="muted"></span><button id="txNext" type="button">Berikutnya</button></div><div class="notice">Riwayat transaksi dipakai untuk menghitung saldo kas. Koreksi transaksi sebaiknya dilakukan dengan catatan pembalik agar jejak audit tetap jelas.</div></section>
+<section class="panel"><div class="panel-head"><div><h2>Dashboard kas</h2><p>Ringkasan arus kas tercatat</p></div></div><div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0"><div><div class="label">Total pemasukan</div><div class="value income" id="incomeSum">Rp0</div></div><div><div class="label">Total pengeluaran</div><div class="value expense" id="expenseSum">Rp0</div></div></div><div class="notice" id="lastUpdated">Belum ada pembaruan.</div></section>
+</div><div>
+<section class="panel"><div class="panel-head"><div><h2>Ketuntasan kas mingguan</h2><p>Centang siswa yang sudah membayar per minggu</p></div></div><div class="editoronly" id="rosterForm"><h3 style="margin:0 0 10px">INPUT PEMBAYARAN KAS</h3><div class="formgrid"><div class="field full"><label>Nama siswa</label><select id="paymentStudent"><option value="">Pilih nama siswa</option></select></div><div class="field full"><label>Kekurangan pembayaran</label><div id="debtDisplay" style="font-weight:800;font-size:20px">Pilih nama siswa</div><div class="muted" id="debtDetail" style="font-size:12px">Pilih nama untuk melihat total tunggakan.</div></div><div class="field full"><label>Jenis pembayaran</label><select id="paymentMode"><option value="due">Pembayaran tertagih (minggu ini dan sebelumnya)</option><option value="future">Pembayaran untuk minggu depan</option></select></div><div class="field"><label>Periode pembayaran</label><select id="paymentStartWeek"></select></div><div class="field"><label>Nominal (kelipatan Rp5.000)</label><input id="paymentAmount" type="number" min="5000" step="5000" value="5000"></div><div class="field"><label>Masuk ke</label><select id="paymentAccount"><option value="cash">Kas tunai</option><option value="bank">Rekening</option></select></div></div><div class="actions"><button class="primary" id="payFull">Lunasi semua</button><button id="payHalf">Bayar setengah</button><button class="primary" id="submitPayment">Input pembayaran</button></div><div class="status" id="paymentStatus"></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="formgrid"><div class="field"><label>Tambah siswa baru</label><input id="studentName" placeholder="Nama lengkap"></div><div class="field"><label>Iuran per minggu (Rp)</label><input id="weeklyAmount" type="number" min="5000" step="5000" value="5000"></div></div><div class="actions"><button id="addStudent">Tambah siswa</button></div><div class="status" id="rosterStatus"></div></div><div class="actions" style="margin:10px 0 4px"><button id="exportPaymentPdf" type="button" class="editoronly export-control">Ekspor rekap pembayaran PDF</button></div><div class="week-tabs" id="weekTabs"></div><div id="paymentRows" class="muted">Belum ada daftar siswa.</div><div class="notice">Status pembayaran ditampilkan secara publik agar rekap kelas transparan. Hindari memasukkan informasi pribadi selain nama dan status iuran.</div></section>
+<section class="panel"><div class="panel-head"><div><h2>Saldo aktual</h2><p>Sesuaikan dengan uang fisik dan rekening yang benar-benar ada</p></div></div><div class="editoronly" id="balanceForm"><div class="formgrid"><div><label>Kas tunai (Rp)</label><input id="cashInput" type="number" min="0" step="1"></div><div><label>Kas rekening (Rp)</label><input id="bankInput" type="number" min="0" step="1"></div></div><div class="actions"><button class="primary" id="saveBalances">Simpan saldo aktual</button></div><div class="status" id="balanceStatus"></div></div><div class="muted" style="font-size:13px">Saldo aktual dibandingkan dengan mutasi tercatat. Ubah saldo awal/rekonsiliasi hanya setelah menghitung uang tunai dan memeriksa rekening.</div></section>
+<section class="panel editoronly" id="adminTools"><div class="panel-head"><div><h2>Pengaturan bendahara</h2><p>Nama kelas dan backup data</p></div></div><div><label>Nama kelas</label><input id="classInput" value="Kas Kelas X1"></div><div class="actions"><button class="primary" id="saveClass">Simpan nama kelas</button><button id="exportJson">Backup JSON</button><button class="danger" id="resetData">Reset seluruh data</button></div><div class="status" id="adminStatus"></div></section>
+</div></div><div class="footer">Treasury · akses publik hanya untuk melihat. Pengeditan dilindungi login dan kebijakan akses database.</div>
+</main>
+<script>
+const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const DEFAULT={className:'Kas Kelas X1',cash:0,bank:0,students:[],transactions:[],paymentLogs:[],weeks:[],nextTransactionSequence:1};
+let state=structuredClone(DEFAULT),currentUser=null,isEditor=false,isSuperadmin=false,isCashier=false,selectedWeek=null,loaded=false,txPageSize=10,txPage=1;
+const $=id=>document.getElementById(id);
+const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>new Date().toLocaleDateString('en-CA');
+function setStatus(id,msg){$(id).textContent=msg}
+function normalize(p){return {...structuredClone(DEFAULT),...(p||{}),students:Array.isArray(p?.students)?p.students:[],transactions:Array.isArray(p?.transactions)?p.transactions:[],paymentLogs:Array.isArray(p?.paymentLogs)?p.paymentLogs:[],nextTransactionSequence:Math.max(1,Number(p?.nextTransactionSequence)||1),weeks:(Array.isArray(p?.weeks)?p.weeks:[]).filter(w=>String(w.label||'').trim().toLowerCase()!=='october - 4')}}
+async function loadState(){const {data,error}=await sb.from('treasury_state').select('payload,updated_at').eq('id',true).maybeSingle();if(error){$('connection').textContent='Gagal memuat data';console.error(error);return}if(data){state=normalize(data.payload);$('lastUpdated').textContent='Terakhir diperbarui: '+new Date(data.updated_at).toLocaleString('id-ID')}else{state=structuredClone(DEFAULT)}if(!selectedWeek&&state.weeks.length){const currentWeek=state.weeks.filter(w=>weekStart(w)&&weekStart(w)<=today()).slice(-1)[0];selectedWeek=(currentWeek||state.weeks[state.weeks.length-1]).id;}loaded=true;render()}
+async function persist(){if(!isEditor){alert('Akses edit hanya untuk bendahara yang sudah login.');return false}const payload=normalize(state);const {error}=await sb.from('treasury_state').upsert({id:true,payload,updated_at:new Date().toISOString()},{onConflict:'id'});if(error){console.error(error);alert('Gagal menyimpan: '+error.message);return false}$('lastUpdated').textContent='Terakhir diperbarui: '+new Date().toLocaleString('id-ID');render();return true}
+async function checkEditor(user){if(!user)return false;const {data,error}=await sb.from('treasury_editors').select('user_id').eq('user_id',user.id).maybeSingle();if(error){console.warn(error);return false}return !!data}
+async function checkSuperadmin(user){if(!user){isCashier=false;return false}const {data,error}=await sb.from('treasury_roles').select('role').eq('user_id',user.id).maybeSingle();if(error){console.warn('Gagal memeriksa role:',error);isCashier=false;return false}isCashier=data?.role==='cashier';return data?.role==='superadmin'}
+function transactionPrefix(type){return type==='income'?'DB':type==='expense'?'CR':type==='transfer'?'TF':'TX'}
+function transactionDateCode(value){const parts=String(value||today()).slice(0,10).split('-');if(parts.length!==3)return '000000';return parts[2]+parts[1]+parts[0].slice(-2)}
+function createTransactionId(type,date){const used=new Set((state.transactions||[]).map(t=>transactionSequence(t)).filter(n=>n>0));let seq=1;while(used.has(seq))seq++;state.nextTransactionSequence=Math.max(Number(state.nextTransactionSequence)||1,seq+1);return transactionPrefix(type)+'-'+transactionDateCode(date)+'/'+String(seq).padStart(3,'0')}
+function transactionSequence(t){const m=String(t?.transactionId||'').match(/\/(\d+)$/);return m?Number(m[1])||0:0}
+function compareTransactionsNewestFirst(a,b){const seqCompare=transactionSequence(b)-transactionSequence(a);if(seqCompare!==0)return seqCompare;const dateCompare=String(b.date||'').localeCompare(String(a.date||''));if(dateCompare!==0)return dateCompare;const timeCompare=String(b.time||'').localeCompare(String(a.time||''));return timeCompare||String(b.id||'').localeCompare(String(a.id||''))}
+function ensureTransactionIds(){let max=0,changed=false;for(const t of state.transactions){const m=String(t.transactionId||'').match(/\/(\d+)$/);if(m)max=Math.max(max,Number(m[1])||0)}let next=Math.max(1,Number(state.nextTransactionSequence)||1,max+1);for(const t of state.transactions){if(!t.transactionId){t.transactionId=transactionPrefix(t.type)+'-'+transactionDateCode(t.date)+'/'+String(next).padStart(3,'0');next++;changed=true}}if(next!==state.nextTransactionSequence){state.nextTransactionSequence=next;changed=true}return changed}
+function requireExportAccess(){if(!isEditor||!currentUser){alert('Silakan login sebagai bendahara untuk menggunakan fitur ekspor.');return false}return true}
+function updateAccess(){document.querySelectorAll('.editoronly').forEach(e=>e.classList.toggle('show',isEditor));$('accessMenu').style.display=isSuperadmin?'inline-block':'none';$('auditMenu').style.display=isSuperadmin?'inline-block':'none';$('loginToggle').style.display=isEditor?'none':'inline-block';$('logoutBtn').style.display=currentUser?'inline-block':'none';$('connection').textContent=isSuperadmin?'Superadmin aktif':isEditor?'Login bendahara aktif':currentUser?'Login tanpa hak edit':'Publik · hanya lihat';$('connection').style.color=(isEditor||isSuperadmin)?'var(--green)':'var(--muted)'}
+function dueFor(s){return Math.max(5000,Number(s.weeklyAmount)||5000)}function paidFor(s,wid){const v=s.paid&&s.paid[wid];return v===true?dueFor(s):Math.max(0,Number(v)||0)}const treasuryCalendar=[['September - 3','2026-09-14'],['September - 4','2026-09-21'],['September - 5','2026-09-28'],['October - 1','2026-10-05'],['October - 2','2026-10-12'],['October - 3','2026-10-19'],['November - 1','2026-11-02'],['November - 2','2026-11-09'],['November - 3','2026-11-16'],['November - 4','2026-11-23'],['December - 1','2026-11-30'],['December - 2','2026-12-07'],['December - 3','2026-12-14'],['January - 1','2027-01-04']];
+function weekStart(w){const norm=String(w.label||'').toLowerCase().replace(/\\s+/g,' ').trim();const found=treasuryCalendar.find(([label])=>label.toLowerCase()===norm);return found?found[1]:null}
+function ensureUpcomingWeeks(){const currentIndex=treasuryCalendar.reduce((last,item,index)=>item[1]<=today()?index:last,-1);if(currentIndex<0)return false;let changed=false;for(let i=Math.max(0,currentIndex-4);i<=Math.min(treasuryCalendar.length-1,currentIndex+4);i++){const [label]=treasuryCalendar[i];if(!state.weeks.some(w=>String(w.label||'').trim().toLowerCase()===label.toLowerCase())){state.weeks.push({id:uid(),label});changed=true}}state.weeks.sort((a,b)=>{const da=weekStart(a),db=weekStart(b);if(da&&db)return da.localeCompare(db);if(da)return -1;if(db)return 1;return 0});if(!selectedWeek){const current=state.weeks.find(w=>weekStart(w)===treasuryCalendar[currentIndex][1]);if(current)selectedWeek=current.id}return changed}
+function billedWeeks(){const d=today();return state.weeks.filter(w=>{const start=weekStart(w);return start&&start<=d})}
+function owedFor(s){return billedWeeks().reduce((sum,w)=>sum+Math.max(0,dueFor(s)-paidFor(s,w.id)),0)+Math.max(0,Number(s.manualOwed)||0)}function paymentWeeks(s){if(!s)return [];if($('paymentMode').value==='due')return billedWeeks();const w=state.weeks.find(x=>x.id===$('paymentStartWeek').value);return w?[w]:[]}function syncPaymentWeekControl(){$('paymentStartWeek').disabled=$('paymentMode').value==='due'}function paymentCapacity(s){return paymentWeeks(s).reduce((sum,w)=>sum+Math.max(0,dueFor(s)-paidFor(s,w.id)),0)+( $('paymentMode').value==='due'?Math.max(0,Number(s.manualOwed)||0):0)}function updateDebtDisplay(){const s=state.students.find(x=>x.id===$('paymentStudent').value);const owed=s?owedFor(s):0,capacity=s?paymentCapacity(s):0;$('debtDisplay').textContent=s?rupiah($('paymentMode').value==='due'?owed:capacity):'Pilih nama siswa';$('debtDetail').textContent=s?($('paymentMode').value==='due'?'Tunggakan jatuh tempo · ':'Tagihan periode terpilih · ')+rupiah(capacity)+' dapat dibayar · iuran '+rupiah(dueFor(s)):'Pilih nama untuk melihat tagihan.';$('paymentAmount').value=capacity?Math.min(5000,Math.ceil(capacity/5000)*5000):5000;$('payFull').disabled=!s||capacity===0;$('payHalf').disabled=!s||capacity<10000;$('submitPayment').disabled=!s||capacity===0}
+function render(){if(!loaded)return;$('classTitle').textContent=state.className.replace(/^Kas Kelas\s*/i,'')||state.className;$('classInput').value=state.className;$('cashInput').value=state.cash;$('bankInput').value=state.bank;$('total').textContent=rupiah(Number(state.cash)+Number(state.bank));$('cashTotal').textContent=rupiah(state.cash);$('bankTotal').textContent=rupiah(state.bank);const week=state.weeks.find(w=>w.id===selectedWeek);const students=state.students;const paid=students.filter(s=>week&&paidFor(s,selectedWeek)>=dueFor(s)).length;const pct=students.length?Math.round(paid/students.length*100):0;$('completion').textContent=pct+'%';$('completionHint').textContent=students.length?(week?paid+' dari '+students.length+' siswa lunas':'Buat/pilih minggu untuk melihat ketuntasan'):'Belum ada data siswa';$('progressBar').style.width=pct+'%';const ins=state.transactions.filter(t=>t.type==='income').reduce((a,t)=>a+Number(t.amount),0),outs=state.transactions.filter(t=>t.type==='expense').reduce((a,t)=>a+Number(t.amount),0);$('incomeSum').textContent=rupiah(ins);$('expenseSum').textContent=rupiah(outs);
+const tabs=$('weekTabs');const currentCalendarIndex=treasuryCalendar.reduce((last,item,index)=>item[1]<=today()?index:last,-1);const visibleWeeks=state.weeks.filter(w=>{const index=treasuryCalendar.findIndex(([label])=>label.toLowerCase()===String(w.label||'').trim().toLowerCase());return index>=0&&currentCalendarIndex>=0&&index>=Math.max(0,currentCalendarIndex-4)&&index<=Math.min(treasuryCalendar.length-1,currentCalendarIndex+4)});tabs.innerHTML=visibleWeeks.length?visibleWeeks.map(w=>'<button class="week-tab '+(w.id===selectedWeek?'active':'')+'" data-week="'+esc(w.id)+'">'+esc(w.label)+'</button>').join(''):'<span class="muted">Belum ada periode pada rentang ini.</span>';tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{selectedWeek=b.dataset.week;render()});
+const ps=$('paymentStudent'),prior=ps.value;ps.innerHTML='<option value="">Pilih nama siswa</option>'+students.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>').join('');if(students.some(s=>s.id===prior))ps.value=prior;const sw=$('paymentStartWeek'),oldWeek=sw.value;const validCalendarWeeks=state.weeks.filter(w=>treasuryCalendar.some(([label])=>label.toLowerCase()===String(w.label||'').trim().toLowerCase()));sw.innerHTML=validCalendarWeeks.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.label)+'</option>').join('');if(validCalendarWeeks.some(w=>w.id===oldWeek))sw.value=oldWeek;else if(validCalendarWeeks.some(w=>w.id===selectedWeek))sw.value=selectedWeek;syncPaymentWeekControl();updateDebtDisplay();
+$('paymentRows').innerHTML=students.length?'<div class="tablewrap"><table style="min-width:420px"><thead><tr><th>Nama siswa</th><th style="text-align:center">Lunas minggu ini</th><th>Tertunggak</th></tr></thead><tbody>'+students.map(s=>{const pa=week?paidFor(s,selectedWeek):0,ok=week&&pa>=dueFor(s);return '<tr><td data-label="Nama siswa">'+esc(s.name)+'</td><td data-label="Status minggu ini" style="text-align:center;font-size:18px;font-weight:800;color:'+(ok?'var(--green)':'var(--amber)')+'">'+(ok?'✓':'—')+'<div style="font-size:11px;font-weight:400;color:var(--muted)">'+(ok?'Lunas':'Belum lunas')+'</div><div style="font-size:11px;color:var(--muted)">'+(week?rupiah(pa)+' / '+rupiah(dueFor(s)):'Pilih minggu')+'</div></td><td data-label="Tertunggak" style="color:'+(owedFor(s)>0?'var(--amber)':'var(--green)')+'">'+rupiah(owedFor(s))+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Tambahkan daftar siswa setelah login bendahara.</div>';
+const allTx=state.transactions.slice().sort(compareTransactionsNewestFirst);
+const query=(isEditor?$('txSearchQuery').value:'').trim().toLowerCase(),dateFilter=isEditor?$('txSearchDate').value:'',typeFilter=isEditor?$('txSearchType').value:'all';
+const tx=allTx.filter(t=>{if(typeFilter!=='all'&&t.type!==typeFilter)return false;if(dateFilter&&String(t.date||'')!==dateFilter)return false;if(!query)return true;const date=String(t.date||''),dateDMY=date?date.slice(8,10)+'/'+date.slice(5,7)+'/'+date.slice(0,4):'';return [t.transactionId,t.date,dateDMY,t.category,t.note,t.student,t.name].some(v=>String(v||'').toLowerCase().includes(query))});
+let run=Number(state.cash)+Number(state.bank);const sorted=allTx.slice().reverse();const bal={};let b=0;sorted.forEach(t=>{b+=(t.type==='income'?1:t.type==='expense'?-1:0)*Number(t.amount);bal[t.id]=b});
+const pageCount=txPageSize==='all'?1:Math.max(1,Math.ceil(tx.length/txPageSize));txPage=Math.min(txPage,pageCount);const pageRows=txPageSize==='all'?tx:tx.slice((txPage-1)*txPageSize,txPage*txPageSize);$('txRows').innerHTML=pageRows.map(t=>{const isTransfer=t.type==='transfer';const accountLabel=isTransfer?(t.fromAccount==='cash'?'Tunai → Rekening':'Rekening → Tunai'):(t.account==='bank'?'Rekening':'Tunai');const amountLabel=isTransfer?'↔ '+rupiah(t.amount):(t.type==='income'?'+':'−')+rupiah(t.amount);return '<tr><td class="editoronly editoronly-cell" data-label="ID Transaksi"><strong>'+esc(t.transactionId||'Belum ada ID')+'</strong></td><td data-label="Tanggal">'+esc(t.date)+'</td><td data-label="Mutasi"><strong>'+esc(t.category)+'</strong><div class="muted">'+esc(t.note||'')+'</div></td><td data-label="Akun">'+accountLabel+'</td><td data-label="Nominal" class="'+(isTransfer?'':t.type==='income'?'income':'expense')+'">'+amountLabel+'</td><td data-label="Saldo gabungan">'+rupiah(bal[t.id]??0)+'</td><td data-label="Aksi">'+(isEditor&&!isCashier?'<button class="danger" data-delete="'+esc(t.id)+'" style="padding:5px 8px">Hapus</button>':'')+'</td></tr>'}).join('');
+$('txEmpty').style.display=tx.length?'none':'block';$('txEmpty').textContent=allTx.length?'Tidak ada transaksi yang cocok dengan pencarian.':'Belum ada mutasi kas.';
+const pageStart=tx.length?(txPageSize==='all'?1:(txPage-1)*txPageSize+1):0,pageEnd=txPageSize==='all'?tx.length:Math.min(txPage*txPageSize,tx.length);$('txPageSize').value=String(txPageSize);$('txPageInfo').textContent=tx.length?'Menampilkan '+pageStart+'–'+pageEnd+' dari '+tx.length+' mutasi':'0 mutasi';$('txPrev').disabled=txPage<=1;$('txNext').disabled=txPage>=pageCount;$('txPagination').style.display=tx.length?'flex':'none';if(isEditor)$('txSearchCount').textContent='Menampilkan '+tx.length+' dari '+allTx.length+' transaksi.';
+$('txRows').querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=async()=>{if(!confirm('Hapus transaksi ini? Disarankan menambah transaksi koreksi agar riwayat tetap jelas.'))return;const transaction=state.transactions.find(t=>t.id===btn.dataset.delete);if(!transaction)return;const oldCash=Number(state.cash)||0,oldBank=Number(state.bank)||0;if(transaction.type==='transfer'){state[transaction.fromAccount]=Number(state[transaction.fromAccount]||0)+Number(transaction.amount||0);state[transaction.toAccount]=Number(state[transaction.toAccount]||0)-Number(transaction.amount||0)}state.transactions=state.transactions.filter(t=>t.id!==btn.dataset.delete);if(!await persist()){state.cash=oldCash;state.bank=oldBank;state.transactions.push(transaction);render()}});updateAccess()}
+function uid(){return crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)}
+let loginInProgress=false,autofillWatcher=null;
+async function performLogin(){
+ if(loginInProgress)return;
+ const button=$('loginBtn'),email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password)return;
+ loginInProgress=true;button.disabled=true;setStatus('authStatus','Memeriksa akun…');
+ try{
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){setStatus('authStatus','Login gagal: '+error.message);return}
+  currentUser=data.user;
+  isEditor=await checkEditor(currentUser);
+  isSuperadmin=await checkSuperadmin(currentUser);
+  if(!isEditor){setStatus('authStatus','Akun berhasil login, tetapi belum terdaftar sebagai bendahara.');await sb.auth.signOut();currentUser=null;updateAccess();return}
+  updateAccess();setStatus('authStatus','Login berhasil. Formulir bendahara aktif.');
+  $('loginBox').classList.remove('open');
+  await loadState();const weeksChanged=ensureUpcomingWeeks();const idsChanged=ensureTransactionIds();if(weeksChanged||idsChanged)await persist();else render();
+ }catch(e){setStatus('authStatus','Gagal memuat akses bendahara: '+(e?.message||String(e)))}
+ finally{loginInProgress=false;button.disabled=false}
+}
+function isAutofilled(input){
+ try{return input.matches(':autofill')||input.matches(':-webkit-autofill')}catch(e){return false}
+}
+function watchSavedPassword(){
+ if(autofillWatcher)clearInterval(autofillWatcher);
+ let checks=0;
+ autofillWatcher=setInterval(()=>{
+  checks++;
+  const email=$('email'),password=$('password');
+  if(email.value.trim()&&password.value&&
+     (isAutofilled(password)||isAutofilled(email))){
+   clearInterval(autofillWatcher);autofillWatcher=null;performLogin();return;
+  }
+  if(checks>=120||!$('loginBox').classList.contains('open')){
+   clearInterval(autofillWatcher);autofillWatcher=null;
+  }
+ },250);
+}
+$('loginToggle').onclick=()=>{ $('loginBox').classList.toggle('open');if($('loginBox').classList.contains('open'))watchSavedPassword();else if(autofillWatcher){clearInterval(autofillWatcher);autofillWatcher=null;} };
+$('cancelLogin').onclick=()=>{$('loginBox').classList.remove('open');if(autofillWatcher){clearInterval(autofillWatcher);autofillWatcher=null;}};
+$('loginBtn').onclick=performLogin;
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;updateAccess();setStatus('authStatus','Kamu sudah keluar.')};
+$('submitTransfer').onclick=async()=>{
+ const amount=Number($('transferAmount').value);
+ const direction=$('transferDirection').value;
+ const fromAccount=direction==='cash_to_bank'?'cash':'bank';
+ const toAccount=direction==='cash_to_bank'?'bank':'cash';
+ if(!Number.isSafeInteger(amount)||amount<=0){setStatus('transferStatus','Masukkan nominal transfer berupa bilangan bulat yang valid.');return}
+ if(amount>Number(state[fromAccount]||0)){setStatus('transferStatus','Saldo '+(fromAccount==='cash'?'tunai':'rekening')+' tidak mencukupi untuk transfer ini.');return}
+ const previousCash=Number(state.cash)||0,previousBank=Number(state.bank)||0;
+ const txDate=$('transferDate').value||today();const transaction={id:uid(),transactionId:createTransactionId('transfer',txDate),date:txDate,type:'transfer',adminEmail:currentUser?.email||'',category:'Transfer Antar-Akun',amount,account:'transfer',fromAccount,toAccount,note:$('transferNote').value.trim()};
+ state[fromAccount]=Number(state[fromAccount])-amount;
+ state[toAccount]=Number(state[toAccount])+amount;
+ state.transactions.push(transaction);
+ const button=$('submitTransfer');button.disabled=true;
+ try{
+  if(await persist()){
+   $('transferAmount').value='';$('transferNote').value='';
+   setStatus('transferStatus','Transfer berhasil dicatat. Saldo total kas tidak berubah.');
+  }else{
+   state.cash=previousCash;state.bank=previousBank;
+   state.transactions=state.transactions.filter(t=>t.id!==transaction.id);
+   render();
+  }
+ }finally{button.disabled=false}
+};
+$('addTx').onclick=async()=>{const amount=Number($('txAmount').value);if(!$('txCategory').value.trim()||!Number.isFinite(amount)||amount<=0){setStatus('txStatus','Isi kategori dan nominal yang valid.');return}const type=$('txType').value,account=$('txAccount').value;if(type==='expense'&&amount>Number(state[account])){setStatus('txStatus','Saldo '+(account==='cash'?'tunai':'rekening')+' tidak cukup. Perbarui saldo aktual atau pilih akun yang benar.');return}const txDate=$('txDate').value||today();state.transactions.push({id:uid(),transactionId:createTransactionId(type,txDate),date:txDate,type,adminEmail:currentUser?.email||'',category:$('txCategory').value.trim(),amount,account,note:$('txNote').value.trim()});state[account]=Number(state[account])+(type==='income'?amount:-amount);if(await persist()){$('txCategory').value='';$('txAmount').value='';$('txNote').value='';setStatus('txStatus','Mutasi tersimpan.')}};
+$('paymentStudent').onchange=updateDebtDisplay;$('paymentMode').onchange=()=>{const mode=$('paymentMode').value;if(mode==='future'){const next=state.weeks.find(w=>{const start=weekStart(w);return start&&start>today()});if(next)$('paymentStartWeek').value=next.id}syncPaymentWeekControl();updateDebtDisplay()};$('paymentStartWeek').onchange=updateDebtDisplay;$('payFull').onclick=()=>{const s=state.students.find(x=>x.id===$('paymentStudent').value);if(s)$('paymentAmount').value=paymentCapacity(s)};$('payHalf').onclick=()=>{const s=state.students.find(x=>x.id===$('paymentStudent').value);if(s)$('paymentAmount').value=Math.max(5000,Math.floor((paymentCapacity(s)/2)/5000)*5000)};$('submitPayment').onclick=async()=>{const s=state.students.find(x=>x.id===$('paymentStudent').value);if(!s){setStatus('paymentStatus','Pilih nama siswa terlebih dahulu.');return}const amount=Number($('paymentAmount').value),account=$('paymentAccount').value,mode=$('paymentMode').value,eligible=paymentWeeks(s);if(!eligible.length){setStatus('paymentStatus','Tidak ada periode yang memenuhi pilihan pembayaran.');return}if(!Number.isInteger(amount)||amount<5000||amount%5000!==0){setStatus('paymentStatus','Nominal harus kelipatan Rp5.000.');return}const capacity=paymentCapacity(s);if(amount>capacity){setStatus('paymentStatus','Nominal melebihi sisa tagihan yang dipilih: '+rupiah(capacity)+'.');return}const oldPaid=JSON.parse(JSON.stringify(s.paid||{})),oldManualOwed=Math.max(0,Number(s.manualOwed)||0),allocations=[];let remaining=amount;if(mode==='due'&&oldManualOwed>0&&remaining>0){const add=Math.min(oldManualOwed,remaining);s.manualOwed=oldManualOwed-add;allocations.push({week:'October - 4',amount:add});remaining-=add}for(const w of eligible){if(remaining<=0)break;const current=paidFor(s,w.id),short=Math.max(0,dueFor(s)-current);if(!short)continue;const add=Math.min(short,remaining);s.paid=s.paid||{};s.paid[w.id]=current+add;allocations.push({week:w.label,amount:add});remaining-=add}if(remaining>0){s.paid=oldPaid;s.manualOwed=oldManualOwed;setStatus('paymentStatus','Pembayaran tidak dapat dialokasikan seluruhnya.');return}const weekText=allocations.map(a=>a.week).join(', '),adminName=currentUser?.user_metadata?.full_name||currentUser?.user_metadata?.name||currentUser?.email||'Administrator',stamp=new Date().toISOString(),createdTx=[];state.paymentLogs=state.paymentLogs||[];state.paymentLogs.push({id:uid(),admin:adminName,adminEmail:currentUser?.email||'',time:stamp,student:s.name,weeks:allocations.map(a=>a.week),mode,amount,account});for(const a of allocations){const txDate=today();const tx={id:uid(),transactionId:createTransactionId('income',txDate),date:txDate,time:stamp,admin:adminName,adminEmail:currentUser?.email||'',type:'income',category:'Pembayaran Kas',amount:a.amount,account,note:s.name+' · '+a.week,student:s.name,week:a.week,mode};state.transactions.push(tx);createdTx.push(tx)}state[account]=Number(state[account])+amount;if(await persist()){setStatus('paymentStatus','Pembayaran '+rupiah(amount)+' berhasil dicatat sebagai '+allocations.length+' transaksi terpisah untuk '+s.name+'.');updateDebtDisplay()}else{s.paid=oldPaid;s.manualOwed=oldManualOwed;state.paymentLogs=state.paymentLogs.filter(x=>x.time!==stamp);state.transactions=state.transactions.filter(t=>!createdTx.some(x=>x.id===t.id));state[account]-=amount;render()}};
+$('addStudent').onclick=async()=>{const name=$('studentName').value.trim();if(!name){setStatus('rosterStatus','Masukkan nama siswa.');return}if(state.students.some(s=>s.name.toLowerCase()===name.toLowerCase())){setStatus('rosterStatus','Nama tersebut sudah ada.');return}const weeklyAmount=Number($('weeklyAmount').value);if(!Number.isInteger(weeklyAmount)||weeklyAmount<5000||weeklyAmount%5000!==0){setStatus('rosterStatus','Iuran mingguan harus kelipatan Rp5.000.');return}state.students.push({id:uid(),name,weeklyAmount,paid:{}});if(await persist()){$('studentName').value='';setStatus('rosterStatus','Siswa ditambahkan.')}};
+
+$('saveBalances').onclick=async()=>{const c=Number($('cashInput').value),b=Number($('bankInput').value);if(c<0||b<0||!Number.isFinite(c)||!Number.isFinite(b)){setStatus('balanceStatus','Saldo tidak boleh negatif.');return}state.cash=c;state.bank=b;if(await persist())setStatus('balanceStatus','Saldo aktual disimpan.')};
+$('saveClass').onclick=async()=>{const v=$('classInput').value.trim();if(!v)return;state.className=v;if(await persist())setStatus('adminStatus','Nama kelas disimpan.')};
+$('exportPaymentPdf').onclick=()=>{
+ if(!requireExportAccess())return;
+ if(!state.students.length){alert('Belum ada data siswa untuk diekspor.');return}
+ if(!window.jspdf?.jsPDF){alert('Fitur PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.');return}
+ const centerIndex=state.weeks.findIndex(w=>w.id===selectedWeek);
+ if(centerIndex<0){alert('Pilih minggu acuan pada bagian Ketuntasan kas mingguan terlebih dahulu.');return}
+ const offsets=[-4,-3,-2,-1,0,1,2,3,4];
+ const periods=offsets.map(offset=>({offset,week:state.weeks[centerIndex+offset]||null}));
+ const headers=['No. Absen','Nama Lengkap',...periods.map(p=>{
+  const label=String(p.week?.label||'');
+  const match=label.match(/^\s*([A-Za-z]+)\s*-\s*(\d+)\s*$/);
+  const periodName=match?match[1]+' '+match[2]:(label||'Minggu tidak tersedia');
+  return periodName+'\n(Week'+(p.offset>0?'+':'')+p.offset+')';
+ })];
+ const body=state.students.map((s,i)=>[
+  String(i+1),
+  s.name,
+  ...periods.map(p=>{
+   if(!p.week)return '—';
+   const due=dueFor(s),paid=paidFor(s,p.week.id);
+   if(paid>=due)return 'LUNAS';
+   if(paid>0)return 'SISA '+rupiah(due-paid);
+   return 'BELUM';
+  })
+ ]);
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+ doc.setFont('helvetica','bold');doc.setFontSize(14);
+ doc.text('REKAP KELENGKAPAN KAS '+(state.className||'KELAS X1').toUpperCase(),14,13);
+ doc.setFont('helvetica','normal');doc.setFontSize(8);
+ const ref=state.weeks[centerIndex]?.label||'';
+ doc.text('Minggu acuan: '+ref+'  |  Diekspor: '+new Date().toLocaleDateString('id-ID'),14,19);
+ doc.autoTable({
+  head:[headers],body,
+  startY:23,theme:'grid',
+  margin:{left:10,right:10,top:23,bottom:12},
+  styles:{font:'helvetica',fontSize:7,cellPadding:1.7,halign:'center',valign:'middle',lineColor:[160,160,160],lineWidth:0.15},
+  headStyles:{fillColor:[36,54,78],textColor:255,fontStyle:'bold',fontSize:7,minCellHeight:12,cellPadding:2},
+  columnStyles:{0:{cellWidth:13},1:{cellWidth:53},2:{cellWidth:23},3:{cellWidth:23},4:{cellWidth:23},5:{cellWidth:23},6:{cellWidth:23},7:{cellWidth:23},8:{cellWidth:23},9:{cellWidth:23},10:{cellWidth:23}},
+  didParseCell:data=>{if(data.section==='body'&&data.column.index>=2){const v=String(data.cell.raw);if(v==='LUNAS'){data.cell.styles.textColor=[20,110,75];data.cell.styles.fontStyle='bold'}else if(v==='BELUM'||v.startsWith('SISA')){data.cell.styles.textColor=[160,95,15]}}}
+ });
+ const pages=doc.internal.getNumberOfPages();
+ for(let page=1;page<=pages;page++){doc.setPage(page);doc.setFontSize(7);doc.text('Halaman '+page+' / '+pages,doc.internal.pageSize.getWidth()-12,doc.internal.pageSize.getHeight()-5,{align:'right'})}
+ doc.save('rekap-kas-'+today()+'.pdf');
+};
+$('exportCsv').onclick=()=>{
+ if(!requireExportAccess())return;const rows=[['ID Transaksi','Tanggal','Jenis','Kategori','Akun / Metode','Nominal','Catatan'],...state.transactions.slice().sort(compareTransactionsNewestFirst).map(t=>[t.transactionId||'',t.date,t.type==='income'?'Pemasukan':t.type==='expense'?'Pengeluaran':'Transfer',t.category,t.type==='transfer'?(t.fromAccount==='cash'?'Tunai → Rekening':'Rekening → Tunai'):(t.account==='bank'?'Rekening':'Tunai'),t.amount,t.note||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');download(csv,'treasury-mutasi-'+today()+'.csv','text/csv;charset=utf-8;')};
+$('exportPdf').onclick=()=>{
+ if(!requireExportAccess())return;
+ const transactions=state.transactions.slice().sort(compareTransactionsNewestFirst);
+ if(!window.jspdf?.jsPDF){alert('Fitur PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.');return}
+ if(!transactions.length){alert('Belum ada mutasi kas untuk diekspor.');return}
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+ const money=value=>new Intl.NumberFormat('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value)||0);
+ const dateLabel=value=>{
+  if(!value)return '—';
+  const parts=String(value).slice(0,10).split('-');
+  if(parts.length!==3)return String(value);
+  const date=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
+  return date.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ };
+ const chronological=transactions.slice().reverse();
+ const totalIncome=transactions.filter(t=>t.type==='income').reduce((sum,t)=>sum+Number(t.amount||0),0);
+ const totalExpense=transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+Number(t.amount||0),0);
+ const endingBalance=Number(state.cash||0)+Number(state.bank||0);
+ const openingBalance=endingBalance-totalIncome+totalExpense;
+ const oldestDate=chronological[0]?.date;
+ const newestDate=transactions[0]?.date;
+ const periodLabel=oldestDate===newestDate?dateLabel(oldestDate):dateLabel(oldestDate)+' s.d. '+dateLabel(newestDate);
+ let runningBalance=openingBalance;
+ const transactionBalances={};
+ chronological.forEach(t=>{
+  const opening=runningBalance;
+  runningBalance+=(t.type==='income'?1:t.type==='expense'?-1:0)*Number(t.amount||0);
+  transactionBalances[t.id]={opening,ending:runningBalance};
+ });
+
+ doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(35,85,135);
+ doc.text('LAPORAN MUTASI KAS',14,16);
+ doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(75,85,99);
+ doc.text((state.className||'Kas Kelas X1')+' · Periode '+periodLabel,14,22);
+ doc.text('Tanggal ekspor: '+dateLabel(today()),14,27);
+
+ doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,85,135);
+ doc.text('I. Ringkasan Eksekutif Keuangan',14,38);
+ doc.autoTable({
+  head:[['Deskripsi Aliran Dana','Jumlah (Rp)']],
+  body:[
+   ['Saldo Awal Periode (sebelum '+dateLabel(oldestDate)+')',money(openingBalance)],
+   ['Total Penerimaan Dana (Pemasukan)',money(totalIncome)],
+   ['Total Penggunaan Dana (Pengeluaran)',money(totalExpense)],
+   [{content:'Total Saldo Akhir Kas',styles:{fontStyle:'bold'}},{content:money(openingBalance+totalIncome-totalExpense),styles:{fontStyle:'bold',fillColor:[232,246,252]}}]
+  ],
+  startY:43,theme:'grid',margin:{left:14,right:14},
+  styles:{font:'helvetica',fontSize:8.5,cellPadding:3,valign:'middle',lineColor:[205,215,225],lineWidth:0.2,textColor:[40,48,58]},
+  headStyles:{fillColor:[47,109,176],textColor:[255,255,255],fontStyle:'bold'},
+  columnStyles:{0:{cellWidth:120},1:{cellWidth:57,halign:'right'}},
+  didParseCell:data=>{if(data.section==='body'&&data.column.index===1)data.cell.styles.halign='right';if(data.section==='body'&&data.row.index===3)data.cell.styles.fontStyle='bold'}
+ });
+ const detailY=doc.lastAutoTable.finalY+13;
+ doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,85,135);
+ doc.text('II. Rincian Buku Besar Mutasi Kas',14,detailY);
+ const body=transactions.map((t,i)=>{
+  const balance=transactionBalances[t.id]||{opening:0,ending:0};
+  return [
+   String(i+1),
+   t.transactionId||'—',
+   dateLabel(t.date),
+   [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
+   t.type==='transfer'?(t.fromAccount==='cash'?'Tunai → Rekening':'Rekening → Tunai'):(t.account==='bank'?'Rekening':'Tunai'),
+   t.type==='income'?money(t.amount):'—',
+   t.type==='expense'?money(t.amount):'—',
+   t.type==='transfer'?money(t.amount):'—',
+   money(balance.opening),
+   money(balance.ending)
+  ];
+ });
+ doc.autoTable({
+  head:[['No','ID Transaksi','Tanggal','Keterangan','Metode Pembayaran','Pemasukan (Rp)','Pengeluaran (Rp)','Transfer (Rp)','Saldo Awal (Rp)','Saldo Akhir (Rp)']],
+  body,
+  startY:detailY+5,
+  theme:'grid',
+  margin:{left:8,right:8,top:12,bottom:12},
+  styles:{font:'helvetica',fontSize:6.2,cellPadding:1.4,valign:'middle',lineColor:[205,215,225],lineWidth:0.2,textColor:[40,48,58],overflow:'linebreak'},
+  headStyles:{fillColor:[47,109,176],textColor:[255,255,255],fontStyle:'bold',halign:'center',minCellHeight:12},
+  columnStyles:{0:{cellWidth:6,halign:'center'},1:{cellWidth:22,halign:'center'},2:{cellWidth:16,halign:'center'},3:{cellWidth:31},4:{cellWidth:19,halign:'center'},5:{cellWidth:18,halign:'right'},6:{cellWidth:18,halign:'right'},7:{cellWidth:16,halign:'right'},8:{cellWidth:22,halign:'right'},9:{cellWidth:22,halign:'right'}},
+  didParseCell:data=>{if(data.section==='body'&&(data.column.index>=5)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
+ });
+ const pages=doc.internal.getNumberOfPages();
+ for(let page=1;page<=pages;page++){
+  doc.setPage(page);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,120,130);
+  doc.text('Halaman '+page+' / '+pages,doc.internal.pageSize.getWidth()-14,doc.internal.pageSize.getHeight()-7,{align:'right'});
+ }
+ doc.save('mutasi-kas-lengkap-'+today()+'.pdf');
+};
+$('exportJson').onclick=()=>{if(!requireExportAccess())return;download(JSON.stringify(state,null,2),'treasury-backup-'+today()+'.json','application/json')};
+function download(content,name,type){const blob=new Blob(['\ufeff',content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+$('resetData').onclick=async()=>{if(!confirm('Yakin reset semua transaksi, siswa, dan periode? Tindakan ini tidak dapat dibatalkan.'))return;state=structuredClone(DEFAULT);selectedWeek=null;if(await persist())setStatus('adminStatus','Data berhasil direset.')};
+$('txDate').value=today();$('transferDate').value=today();['txSearchQuery','txSearchDate','txSearchType'].forEach(id=>$(id).addEventListener('input',()=>{txPage=1;render()}));$('txPageSize').addEventListener('change',()=>{const v=$('txPageSize').value;txPageSize=v==='all'?'all':Number(v);txPage=1;render()});$('txPrev').addEventListener('click',()=>{if(txPage>1){txPage--;render()}});$('txNext').addEventListener('click',()=>{txPage++;render()});
+sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;updateAccess()}else if(session?.user){currentUser=session.user;queueMicrotask(async()=>{try{currentUser=session.user;isEditor=await checkEditor(currentUser);isSuperadmin=await checkSuperadmin(currentUser);updateAccess()}catch(e){console.error(e);setStatus('authStatus','Gagal memeriksa izin: '+(e?.message||String(e)))}})}});
+(async()=>{try{setStatus('authStatus','Menghubungkan ke Supabase…');const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session){currentUser=data.session.user;isEditor=await checkEditor(currentUser);isSuperadmin=await checkSuperadmin(currentUser)}await loadState();if(isEditor&&ensureTransactionIds())await persist();updateAccess();if(isEditor)setStatus('authStatus','Login bendahara aktif.')}catch(e){console.error(e);$('connection').textContent='Koneksi gagal';setStatus('authStatus','Gagal memuat: '+(e?.message||String(e)))}})();
+</script>
+</body></html>
