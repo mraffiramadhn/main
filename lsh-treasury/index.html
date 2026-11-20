@@ -46,7 +46,8 @@ function buildReport(payload){
  let balance=currentBalance-allIncome+allExpense;
  if(!posted.length)return {rows:[],creditAll,debitAll,currentBalance};
  const first=posted.map(t=>t.date).sort()[0];
- const end=new Date(dateNow()+'T00:00:00Z');end.setUTCDate(end.getUTCDate()-1);\n const endDate=end.toISOString().slice(0,10);
+ const end=new Date(dateNow()+'T00:00:00Z');end.setUTCDate(end.getUTCDate()-1);
+ const endDate=end.toISOString().slice(0,10);
  const byDate={};
  for(const t of posted){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].credit+=Number(t.amount||0);if(t.type==='expense')byDate[d].debit+=Number(t.amount||0)}
  const rows=[];
