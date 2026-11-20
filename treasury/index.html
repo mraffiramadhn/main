@@ -176,6 +176,36 @@ th{letter-spacing:.025em}
  .panel{padding:12px;border-radius:13px}
 }
 
+
+
+/* Header action bar: prevent accidental text highlighting and unify controls */
+.top-actions{
+ display:flex!important;align-items:center!important;justify-content:flex-end!important;
+ gap:8px!important;flex-wrap:wrap!important;user-select:none;-webkit-user-select:none;
+}
+.top-actions a{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:40px!important;padding:9px 13px!important;border:1px solid var(--line)!important;
+ border-radius:11px!important;background:#142238!important;color:var(--cyan)!important;
+ text-decoration:none!important;font-size:13px!important;font-weight:650!important;
+ line-height:1.2!important;white-space:nowrap!important;
+}
+.top-actions a:hover{background:#1b304a!important;border-color:#45627f!important}
+.top-actions .pill{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:40px!important;padding:8px 12px!important;border-radius:11px!important;
+ background:#102b27!important;border:1px solid #286456!important;color:var(--green)!important;
+ white-space:nowrap!important;
+}
+.top-actions button{
+ min-height:40px!important;padding:9px 15px!important;border-radius:11px!important;
+ white-space:nowrap!important;
+}
+@media(max-width:700px){
+ .top-actions{justify-content:flex-start!important;gap:6px!important}
+ .top-actions a,.top-actions .pill,.top-actions button{min-height:36px!important;padding:8px 10px!important;font-size:12px!important}
+}
+
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="eyebrow">Class finance · transparent & accountable</div><h1>💸 Treasury <span id="classTitle">X1</span></h1><div class="sub">Pusat transparansi kas kelas · data publik, pengelolaan terbatas</div></div><div class="top-actions"><a href="/lsh-treasury/" style="color:var(--cyan);align-self:center">Laporan Saldo Harian</a><span class="pill" id="connection">Menghubungkan…</span><a id="accessMenu" href="/access.html" style="display:none;color:var(--cyan);align-self:center">Kelola akses</a><a id="auditMenu" href="/audit.html" style="display:none;color:var(--cyan);align-self:center">Log aktivitas</a><button id="loginToggle">Login bendahara</button><button id="logoutBtn" style="display:none">Keluar</button></div></header>
