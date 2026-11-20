@@ -501,7 +501,7 @@ $('exportPdf').onclick=()=>{
  const body=transactions.map((t,i)=>{
   const balance=transactionBalances[t.id]||{opening:0,ending:0};
   return [
-   String(i+1),
+   String(transactions.length-i),
    t.transactionId||'—',
    dateLabel(t.date),
    [t.category||'Mutasi kas',t.note||''].filter(Boolean).join(' · '),
@@ -521,7 +521,7 @@ $('exportPdf').onclick=()=>{
   margin:{left:8,right:8,top:12,bottom:12},
   styles:{font:'helvetica',fontSize:6.2,cellPadding:1.4,valign:'middle',lineColor:[205,215,225],lineWidth:0.2,textColor:[40,48,58],overflow:'linebreak'},
   headStyles:{fillColor:[47,109,176],textColor:[255,255,255],fontStyle:'bold',halign:'center',minCellHeight:12},
-  columnStyles:{0:{cellWidth:6,halign:'center'},1:{cellWidth:22,halign:'center'},2:{cellWidth:16,halign:'center'},3:{cellWidth:31},4:{cellWidth:19,halign:'center'},5:{cellWidth:18,halign:'right'},6:{cellWidth:18,halign:'right'},7:{cellWidth:16,halign:'right'},8:{cellWidth:22,halign:'right'},9:{cellWidth:22,halign:'right'}},
+  columnStyles:{0:{cellWidth:9,halign:'center'},1:{cellWidth:22,halign:'center'},2:{cellWidth:16,halign:'center'},3:{cellWidth:31},4:{cellWidth:19,halign:'center'},5:{cellWidth:18,halign:'right'},6:{cellWidth:18,halign:'right'},7:{cellWidth:16,halign:'right'},8:{cellWidth:22,halign:'right'},9:{cellWidth:22,halign:'right'}},
   didParseCell:data=>{if(data.section==='body'&&(data.column.index>=5)&&data.cell.raw!=='—')data.cell.styles.halign='right'}
  });
  const pages=doc.internal.getNumberOfPages();
