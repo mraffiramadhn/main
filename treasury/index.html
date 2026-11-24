@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#EFE8DD">
+<meta name="theme-color" content="#303841">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 <title>Treasury X1 — Kas Kelas</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -608,12 +608,12 @@ sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser
   if(metaTheme)metaTheme.setAttribute('content',dark?'#303841':'#EFE8DD');
  };
  let savedTheme=null;
- try{savedTheme=localStorage.getItem('treasury-x1-theme')}catch(e){}
- applyTheme(savedTheme==='dark'?'dark':'light');
+ try{savedTheme=localStorage.getItem('ramaspace-theme')}catch(e){}
+ applyTheme(savedTheme==='light'?'light':'dark');
  toggle.addEventListener('click',()=>{
   const next=root.dataset.theme==='dark'?'light':'dark';
   applyTheme(next);
-  try{localStorage.setItem('treasury-x1-theme',next)}catch(e){}
+  try{localStorage.setItem('ramaspace-theme',next)}catch(e){}
  });
 })();
 </script>
