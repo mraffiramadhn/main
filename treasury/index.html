@@ -466,6 +466,33 @@ html[data-theme="dark"] .top-actions .pill{
  color:#FFFFFF!important;
 }
 
+
+/* Mobile dark-mode roster: stronger separation between student cards and panel */
+@media (max-width:600px){
+ html[data-theme="dark"] #paymentRows .tablewrap tr{
+  background:linear-gradient(145deg,#405674,#394D68)!important;
+  border:1px solid rgba(225,235,248,.32)!important;
+  box-shadow:0 3px 10px rgba(0,0,0,.16);
+ }
+ html[data-theme="dark"] #paymentRows .tablewrap td:first-child{
+  color:#FFFFFF!important;
+  border-bottom:1px solid rgba(225,235,248,.24)!important;
+ }
+ html[data-theme="dark"] #paymentRows .tablewrap td:before{
+  color:#E1E9F3!important;
+  font-weight:700;
+ }
+ html[data-theme="dark"] #paymentRows .paid{
+  background:rgba(181,205,187,.24)!important;
+  color:#E0F0E3!important;
+  border:1px solid rgba(181,205,187,.3);
+ }
+ html[data-theme="dark"] #paymentRows .unpaid{
+  background:rgba(224,201,157,.23)!important;
+  color:#F7E7C7!important;
+  border:1px solid rgba(224,201,157,.32);
+ }
+}
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="eyebrow">Class finance · transparent & accountable</div><h1>💸 Treasury <span id="classTitle">X1</span></h1><div class="sub">Pusat transparansi kas kelas · data publik, pengelolaan terbatas</div></div><div class="top-actions"><span class="pill" id="connection">Menghubungkan…</span><a href="/lsh-treasury/" style="color:var(--cyan);align-self:center">Laporan Saldo Harian</a><a id="accessMenu" href="/access.html" style="display:none;color:var(--cyan);align-self:center">Kelola akses</a><a id="auditMenu" href="/audit.html" style="display:none;color:var(--cyan);align-self:center">Log aktivitas</a><button id="loginToggle">Login bendahara</button><button id="logoutBtn" style="display:none">Keluar</button><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false"><span id="themeIcon" aria-hidden="true">☾</span></button></div></header>
