@@ -17,10 +17,73 @@ h1{font-size:clamp(2.8rem,7vw,5.4rem);line-height:1.03;letter-spacing:-.065em;ma
 section{padding:68px 0;border-top:1px solid var(--line)}h2{font-size:clamp(2rem,4vw,3rem);line-height:1.1;letter-spacing:-.045em;margin:10px 0 14px}.intro{max-width:660px;color:var(--muted);margin-bottom:28px}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:24px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(145deg,#101d30f0,#0d1828c9)}.card h3{margin:0 0 8px}.card p{color:var(--muted);margin:0}.emoji{font-size:1.7rem;display:block;margin-bottom:14px}.tag{font-size:.78rem;color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:block}.contact{display:flex;align-items:center;justify-content:space-between;gap:24px}.contact p{color:var(--muted);max-width:600px}footer{padding:25px 0 35px;color:var(--muted);font-size:.85rem}.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 @media(max-width:740px){.links{gap:12px;font-size:.82rem}.hero{grid-template-columns:1fr;padding:50px 0 55px;gap:10px}.visual{min-height:240px;order:-1}.orb{width:220px}.f1{left:2%}.f2{right:2%}.two,.three{grid-template-columns:1fr}.contact{align-items:flex-start;flex-direction:column}.card{padding:21px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Murrdhn-inspired visual theme; existing content and section layout preserved. */
+:root {
+  color-scheme: light;
+  --bg: #EFE8DD;
+  --panel: #EBEBD8;
+  --text: #303841;
+  --muted: #68737a;
+  --blue: #2F4A63;
+  --cyan: #76ABAE;
+  --line: rgba(48,56,65,.16);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #303841;
+  --panel: #2F4A63;
+  --text: #EFE8DD;
+  --muted: #B5BEC4;
+  --blue: #EBEBD8;
+  --cyan: #895451;
+  --line: rgba(239,232,221,.18);
+}
+body {
+  background: radial-gradient(ellipse at 80% 0%, color-mix(in srgb, var(--cyan) 18%, transparent), transparent 38%), var(--bg);
+  color: var(--text);
+  transition: background-color .25s ease, color .25s ease;
+}
+nav { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+.links { color: var(--blue); }
+.links a:hover, .top { color: var(--cyan); }
+h1 span { background: linear-gradient(100deg, var(--blue), var(--cyan)); color: transparent; background-clip: text; }
+.lead, .intro, .card p, .contact p { color: var(--muted); }
+.btn { border-color: var(--text); color: var(--text); }
+.btn.primary { background: var(--text); color: var(--panel); border-color: var(--text); }
+.btn:hover { border-color: var(--cyan); }
+.orb { border-color: color-mix(in srgb, var(--cyan) 48%, transparent); background: linear-gradient(145deg, color-mix(in srgb, var(--blue) 16%, transparent), color-mix(in srgb, var(--cyan) 8%, transparent)); box-shadow: 0 0 80px color-mix(in srgb, var(--cyan) 14%, transparent); }
+.monogram { background: linear-gradient(135deg, var(--text), var(--blue), var(--cyan)); color: transparent; background-clip: text; }
+.float { background: var(--panel); color: var(--muted); border-color: var(--line); }
+section { border-color: var(--line); }
+.card { background: linear-gradient(145deg, color-mix(in srgb, var(--panel) 96%, var(--bg)), var(--panel)); border-color: var(--line); }
+.tag, .kicker, .eyebrow { color: var(--blue); }
+.eyebrow:before { background: var(--cyan); }
+.emoji { filter: saturate(.8); }
+footer { color: var(--muted); }
+.theme-toggle {
+  flex: 0 0 auto; width: 38px; height: 38px; display: inline-grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--panel);
+  color: var(--text); font-size: 1.1rem; cursor: pointer; transition: background .2s, border-color .2s, transform .2s;
+}
+.theme-toggle:hover { border-color: var(--cyan); transform: translateY(-1px); }
+.theme-toggle:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+@media(max-width:740px) {
+  .links { gap: 9px; font-size: .76rem; }
+  .theme-toggle { width: 34px; height: 34px; font-size: 1rem; }
+}
+@media(max-width:380px) {
+  .links { gap: 6px; font-size: .7rem; }
+  .nav { gap: 9px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body, .theme-toggle { transition: none; }
+}
+
 </style>
 </head>
 <body>
-<nav><div class="wrap nav"><a class="brand" href="#home">MRR<span>.</span></a><div class="links"><a href="#about">Tentang</a><a href="#interests">Minat</a><a href="#projects">Proyek</a><a href="#contact">Kontak</a></div></div></nav>
+<nav><div class="wrap nav"><a class="brand" href="#home">MRR<span>.</span></a><div class="links"><a href="#about">Tentang</a><a href="#interests">Minat</a><a href="#projects">Proyek</a><a href="#contact">Kontak</a></div><button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" aria-pressed="false"><span id="themeIcon" aria-hidden="true">☾</span></button></div></nav>
 <main>
 <div class="wrap hero" id="home"><div><div class="eyebrow">Personal website</div><h1>Halo, saya<br><span>Raffi Ramadhan.</span></h1><p class="lead">Seorang pelajar yang senang belajar hal baru, mengeksplorasi ide, dan membangun sesuatu yang bermanfaat—satu langkah dalam satu waktu.</p><div class="actions"><a class="btn primary" href="#about">Kenali saya ↘</a><a class="btn" href="#projects">Lihat proyek</a></div></div><div class="visual" aria-label="Monogram MRR"><div class="orb"><div class="inner"><div class="monogram">MRR</div></div></div><div class="float f1">Curious by nature ✦</div><div class="float f2">Learning in progress ↗</div></div></div>
 <section id="about"><div class="wrap"><div class="kicker">01 / Tentang saya</div><h2>Terus tumbuh,<br>terus mencoba.</h2><p class="intro">Perjalanan tidak harus langsung sempurna. Yang penting, terus belajar dan membuat kemajuan yang berarti.</p><div class="two"><article class="card"><h3>Sedikit tentang saya</h3><p>Saya Muhammad Raffi Ramadhan, seorang pelajar di SMAN 2 Kota Mojokerto. Saya tertarik pada pendidikan, pengelolaan keuangan, teknologi, dan ide-ide yang bisa dikembangkan menjadi proyek nyata.</p></article><article class="card"><h3>Prinsip yang saya pegang</h3><p>Aktif, terus belajar, dan tetap menjaga keseimbangan. Bertumbuh bukan soal melakukan semuanya sekaligus, melainkan memilih langkah yang tepat.</p></article></div></div></section>
@@ -28,5 +91,28 @@ section{padding:68px 0;border-top:1px solid var(--line)}h2{font-size:clamp(2rem,
 <section id="projects"><div class="wrap"><div class="kicker">03 / Ruang berkarya</div><h2>Proyek & perjalanan.</h2><p class="intro">Tempat untuk mencatat hal yang sedang dipelajari dan proyek yang akan terus berkembang.</p><div class="two"><article class="card"><span class="tag">Finance & organization</span><h3>Treasury — Kas Kelas</h3><p>Dashboard pencatatan kas kelas, status pembayaran mingguan, dan mutasi kas.</p><div class="actions"><a class="btn primary" href="/treasury/">Buka Treasury ↗</a></div></article><article class="card"><span class="tag">Personal finance</span><h3>Finance Dashboard</h3><p>Ruang untuk mengelola dan memantau pencatatan keuangan pribadi.</p><div class="actions"><a class="btn primary" href="finance.html">Buka Finance ↗</a></div></article></div></div></section>
 <section id="contact"><div class="wrap"><div class="card contact"><div><div class="kicker">04 / Kontak & media sosial</div><h2>Terhubung, bertukar ide.</h2><p>Temukan playlist yang sedang saya dengarkan atau kunjungi Instagram saya.</p><div class="actions"><a class="btn primary" href="https://open.spotify.com/playlist/3UURXStwvh7MTLqXLpgDFm?si=3MdklvY5ShOaDvZZFcHKzA" target="_blank" rel="noopener noreferrer">♫ Spotify Playlist ↗</a><a class="btn" href="https://instagram.com/murrdhn_" target="_blank" rel="noopener noreferrer">◎ Instagram ↗</a></div></div><a class="btn" href="#home">Kembali ke atas ↑</a></div></div></section>
 </main><footer><div class="wrap foot"><span>© <span id="year">2026</span> Muhammad Raffi Ramadhan</span><span>Dibuat dengan rasa ingin tahu dan semangat belajar.</span></div></footer>
-<script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+(() => {
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  const savedTheme = localStorage.getItem('ramaspace-theme');
+  const applyTheme = (theme) => {
+    const dark = theme === 'dark';
+    root.dataset.theme = dark ? 'dark' : 'light';
+    icon.textContent = dark ? '☀' : '☾';
+    toggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    toggle.setAttribute('aria-pressed', String(dark));
+    if (metaTheme) metaTheme.setAttribute('content', dark ? '#303841' : '#EFE8DD');
+  };
+  applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+  toggle.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('ramaspace-theme', next);
+  });
+})();
+</script>
 </body></html>
