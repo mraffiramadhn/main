@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1220">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#303841">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 <title>Daftar Akun — Treasury X1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,8 +18,25 @@ button:disabled{opacity:.55;cursor:not-allowed}.status{font-size:13px;min-height
 .notice{border-left:2px solid var(--amber);padding-left:10px;margin-top:18px;font-size:12px;color:var(--muted)}
 a{color:var(--cyan)}.links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;font-size:13px}
 @media(max-width:420px){.card{padding:19px}h1{font-size:26px}}
-</style></head>
-<body><main class="card">
+
+/* RamaSpace shared identity · dark-first */
+:root{color-scheme:dark;--bg:#303841;--panel:#2F4A63;--panel2:#263746;--line:rgba(239,232,221,.18);--text:#EFE8DD;--muted:#B5BEC4;--cyan:#895451;--blue:#EBEBD8;--red:#fda4af;--green:#86efac;--amber:#fcd34d}
+html[data-theme="light"]{color-scheme:light;--bg:#EFE8DD;--panel:#EBEBD8;--panel2:#E3DED2;--line:rgba(48,56,65,.16);--text:#303841;--muted:#68737a;--cyan:#76ABAE;--blue:#2F4A63;--red:#a94e58;--green:#34765b;--amber:#9a6b20}
+body{background:radial-gradient(ellipse at top right,color-mix(in srgb,var(--cyan) 18%,transparent) 0,transparent 44%),var(--bg);color:var(--text)}
+.panel,.card{background:linear-gradient(145deg,var(--panel),var(--panel2));border-color:var(--line);color:var(--text)}
+input,select{background:var(--bg);color:var(--text);border-color:var(--line)}
+button{background:var(--panel2);color:var(--text);border-color:var(--line)}
+button.primary{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+button.danger{background:color-mix(in srgb,var(--red) 13%,var(--panel));color:var(--red);border-color:color-mix(in srgb,var(--red) 50%,var(--line))}
+th{background:var(--panel2);color:var(--muted)}
+.tag{background:color-mix(in srgb,var(--green) 15%,var(--panel));color:var(--green)}
+.notice{border-left-color:var(--cyan)}
+a{color:var(--blue)}
+.theme-toggle{width:auto!important;min-width:40px;height:40px;padding:8px 12px!important;margin:0!important;border:1px solid var(--line)!important;border-radius:10px!important;background:var(--panel)!important;color:var(--text)!important;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.theme-toggle:hover{border-color:var(--cyan)!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.theme-toggle-fixed{position:fixed;top:18px;right:18px;z-index:5}</style></head>
+<body><button id="themeToggle" class="theme-toggle theme-toggle-fixed" type="button" aria-label="Switch to light theme" aria-pressed="true">☀</button><main class="card">
 <div class="eyebrow">Treasury X1 · Account</div><h1>Daftar akun</h1>
 <p class="muted">Buat akun menggunakan email pribadi yang aktif. Email harus dikonfirmasi dengan kode OTP yang dikirim Supabase sebelum akun dapat digunakan untuk login.</p>
 <form id="signupForm">
@@ -91,4 +108,11 @@ $('signupForm').addEventListener('submit',async e=>{
   $('signupBtn').disabled=false;
  }
 });
+</script>
+<script>
+(()=>{const root=document.documentElement,btn=document.getElementById('themeToggle'),meta=document.querySelector('meta[name="theme-color"]');if(!btn)return;
+const apply=t=>{const dark=t==='dark';root.dataset.theme=dark?'dark':'light';btn.textContent=dark?'☀':'☾';btn.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');btn.setAttribute('aria-pressed',String(dark));if(meta)meta.content=dark?'#303841':'#EFE8DD'};
+let saved=null;try{saved=localStorage.getItem('ramaspace-theme')}catch(e){}apply(saved==='light'?'light':'dark');
+btn.addEventListener('click',()=>{const next=root.dataset.theme==='dark'?'light':'dark';apply(next);try{localStorage.setItem('ramaspace-theme',next)}catch(e){}});
+})();
 </script></body></html>
