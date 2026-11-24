@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#08111f">
+<meta name="theme-color" content="#303841">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 
 <meta name="description" content="Website personal Muhammad Raffi Ramadhan — profil, minat, dan perjalanan bertumbuh.">
@@ -107,7 +107,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
     toggle.setAttribute('aria-pressed', String(dark));
     if (metaTheme) metaTheme.setAttribute('content', dark ? '#303841' : '#EFE8DD');
   };
-  applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+  applyTheme(savedTheme === 'light' ? 'light' : 'dark');
   toggle.addEventListener('click', () => {
     const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
