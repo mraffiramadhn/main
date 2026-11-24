@@ -55,6 +55,17 @@ a{color:var(--blue)}
 </section>
 <div class="notice">Pendaftaran hanya membuat akun dan mengonfirmasi email. Akun baru tidak otomatis mendapat akses bendahara. Pemberian atau pencabutan role tetap dilakukan Superadmin melalui Kelola Akses.</div>
 <div class="links"><a href="treasury.html">← Kembali ke Treasury</a><a href="treasury.html#loginBox">Sudah punya akun? Login</a></div>
+<div class="links" style="justify-content:center"><a href="#" id="showReset">Lupa password? Reset di sini</a></div>
+<section id="resetBox" style="display:none;border-top:1px solid var(--line);margin-top:20px;padding-top:17px">
+<strong>Reset password</strong>
+<p class="muted">Masukkan email akun Treasury. Jika email terdaftar, Supabase akan mengirim tautan untuk membuat password baru.</p>
+<form id="resetForm">
+<label for="resetEmail">Email akun</label><input id="resetEmail" type="email" autocomplete="email" required maxlength="254" placeholder="nama@email.com">
+<button id="resetBtn" class="primary" type="submit">Kirim tautan reset password</button>
+<button id="cancelReset" type="button">Batal</button>
+</form>
+<div id="resetStatus" class="status" aria-live="polite"></div>
+</section>
 </main>
 <script>
 const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
@@ -69,6 +80,26 @@ try{
  if(status){status.textContent=initError.message;status.className='status bad';}
 }
 function setStatus(id,message,type=''){const el=$(id);el.textContent=message;el.className='status'+(type?' '+type:'')}
+$('showReset').addEventListener('click',e=>{
+ e.preventDefault();
+ $('resetBox').style.display='block';
+ $('resetEmail').value=$('email').value.trim();
+ $('resetBox').scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+$('cancelReset').addEventListener('click',()=>{$('resetBox').style.display='none';setStatus('resetStatus','')});
+$('resetForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const email=$('resetEmail').value.trim().toLowerCase();
+ $('resetBtn').disabled=true;setStatus('resetStatus','Memproses permintaan…');
+ try{
+  if(!sb)throw new Error('Koneksi Supabase belum siap. Muat ulang halaman dan coba lagi.');
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://ramaspace.my.id/update-password.html'});
+  if(error)throw error;
+  setStatus('resetStatus','Jika email tersebut terdaftar, tautan reset password akan dikirim. Periksa kotak masuk dan folder spam.','good');
+ }catch(err){
+  setStatus('resetStatus','Permintaan reset belum dapat diproses: '+(err?.message||'Terjadi kesalahan. Coba lagi nanti.'),'bad');
+ }finally{$('resetBtn').disabled=false}
+});
 $('verifyBtn').addEventListener('click',async()=>{
  const token=$('otp').value.trim();
  if(!/^\d{8}$/.test(token)){setStatus('otpStatus','Masukkan kode OTP 8 digit.','bad');return}
