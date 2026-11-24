@@ -377,6 +377,95 @@ input:focus,select:focus{
 }
 .notice{border-left-color:var(--cyan)}
 
+
+ 
+/* Dark mode palette update — softened navy family and pure-white typography */
+html[data-theme="dark"]{
+ /* Softened from #0B132B, #1C2541 and #2F4A63 */
+ --bg:#17213A;
+ --panel:#2B3B58;
+ --panel2:#344761;
+ --line:rgba(255,255,255,.18);
+ --text:#FFFFFF;
+ --muted:#D5DCE8;
+ --blue:#C3D0E2;
+ --green:#B5CDBB;
+ --red:#E0B1B4;
+ --amber:#E0C99D;
+ color-scheme:dark;
+}
+html[data-theme="dark"] body{
+ background:
+  radial-gradient(ellipse at top right,rgba(137,84,81,.13) 0,transparent 46%),
+  var(--bg);
+ color:#FFFFFF;
+}
+html[data-theme="dark"] .stat,
+html[data-theme="dark"] .panel{
+ background:linear-gradient(145deg,#2B3B58,#344761);
+ border-color:var(--line);
+}
+html[data-theme="dark"] #paymentRows .tablewrap tr{
+ background:#344761!important;
+ border-color:rgba(255,255,255,.2)!important;
+}
+html[data-theme="dark"] #paymentRows .tablewrap td,
+html[data-theme="dark"] #paymentRows .tablewrap td:first-child{
+ color:#FFFFFF!important;
+}
+html[data-theme="dark"] #paymentRows .tablewrap td:before{
+ color:#D5DCE8!important;
+}
+html[data-theme="dark"] th{
+ background:#263653;
+ color:#FFFFFF;
+}
+html[data-theme="dark"] td,
+html[data-theme="dark"] .stat .value,
+html[data-theme="dark"] .panel h2,
+html[data-theme="dark"] .top h1,
+html[data-theme="dark"] label{
+ color:#FFFFFF;
+}
+html[data-theme="dark"] .sub,
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] .stat .label,
+html[data-theme="dark"] .stat .hint,
+html[data-theme="dark"] .panel-head p,
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] .notice,
+html[data-theme="dark"] .check{
+ color:#D5DCE8;
+}
+html[data-theme="dark"] button,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select{
+ color:#FFFFFF;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select{
+ background:#202E49;
+ border-color:rgba(255,255,255,.22);
+}
+html[data-theme="dark"] button.primary,
+html[data-theme="dark"] .week-tab.active{
+ background:#895451!important;
+ color:#FFFFFF!important;
+ border-color:#A66C68!important;
+}
+html[data-theme="dark"] .paid{
+ background:rgba(181,205,187,.19);
+ color:#D5E8D9;
+}
+html[data-theme="dark"] .unpaid{
+ background:rgba(224,201,157,.19);
+ color:#F1DDB6;
+}
+html[data-theme="dark"] .top-actions a,
+html[data-theme="dark"] .top-actions .pill{
+ color:#FFFFFF!important;
+}
+
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="eyebrow">Class finance · transparent & accountable</div><h1>💸 Treasury <span id="classTitle">X1</span></h1><div class="sub">Pusat transparansi kas kelas · data publik, pengelolaan terbatas</div></div><div class="top-actions"><span class="pill" id="connection">Menghubungkan…</span><a href="/lsh-treasury/" style="color:var(--cyan);align-self:center">Laporan Saldo Harian</a><a id="accessMenu" href="/access.html" style="display:none;color:var(--cyan);align-self:center">Kelola akses</a><a id="auditMenu" href="/audit.html" style="display:none;color:var(--cyan);align-self:center">Log aktivitas</a><button id="loginToggle">Login bendahara</button><button id="logoutBtn" style="display:none">Keluar</button><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false"><span id="themeIcon" aria-hidden="true">☾</span></button></div></header>
