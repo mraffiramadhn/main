@@ -571,6 +571,42 @@ const pageStart=tx.length?(txPageSize==='all'?1:(txPage-1)*txPageSize+1):0,pageE
 $('txRows').querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=async()=>{if(!confirm('Hapus transaksi ini? Disarankan menambah transaksi koreksi agar riwayat tetap jelas.'))return;const transaction=state.transactions.find(t=>t.id===btn.dataset.delete);if(!transaction)return;const oldCash=Number(state.cash)||0,oldBank=Number(state.bank)||0;if(transaction.type==='transfer'){state[transaction.fromAccount]=Number(state[transaction.fromAccount]||0)+Number(transaction.amount||0);state[transaction.toAccount]=Number(state[transaction.toAccount]||0)-Number(transaction.amount||0)}state.transactions=state.transactions.filter(t=>t.id!==btn.dataset.delete);if(!await persist()){state.cash=oldCash;state.bank=oldBank;state.transactions.push(transaction);render()}});updateAccess()}
 function uid(){return crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)}
 let loginInProgress=false,autofillWatcher=null;
+let sessionGuardTimer=null,sessionGuardBusy=false;
+const TREASURY_SESSION_CHECK_MS=30000;
+function stopSessionGuard(){if(sessionGuardTimer){clearInterval(sessionGuardTimer);sessionGuardTimer=null}}
+async function clearLocalTreasurySession(message){
+ stopSessionGuard();
+ try{await sb.auth.signOut({scope:'local'})}catch(e){}
+ currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;isViewer=false;updateAccess();
+ if(message)setStatus('authStatus',message);
+}
+async function verifyTreasurySession(){
+ if(!currentUser||sessionGuardBusy)return false;
+ sessionGuardBusy=true;
+ try{
+  const {data,error}=await sb.rpc('treasury_session_valid');
+  if(error||data!==true){
+   await clearLocalTreasurySession('Sesi berakhir atau akun digunakan di perangkat lain. Silakan login kembali.');
+   return false;
+  }
+  return true;
+ }catch(e){
+  console.error('Session validation failed',e);
+  await clearLocalTreasurySession('Sesi tidak dapat diverifikasi. Silakan login kembali.');
+  return false;
+ }finally{sessionGuardBusy=false}
+}
+function startSessionGuard(){
+ stopSessionGuard();
+ sessionGuardTimer=setInterval(()=>{verifyTreasurySession()},TREASURY_SESSION_CHECK_MS);
+}
+async function registerTreasurySession(){
+ const {data,error}=await sb.rpc('treasury_register_session');
+ if(error||data!==true)throw error||new Error('Sesi perangkat gagal didaftarkan.');
+ startSessionGuard();
+ return true;
+}
+
 async function performLogin(){
  if(loginInProgress)return;
  const button=$('loginBtn'),email=$('email').value.trim(),password=$('password').value;
@@ -582,8 +618,9 @@ async function performLogin(){
   currentUser=data.user;
   const role=await checkUserRole(currentUser);
   isSuperadmin=role==='superadmin';isViewer=role==='viewer';isEditor=(role==='admin'||role==='superadmin')&&await checkEditor(currentUser);
-  if(!isEditor&&!isViewer){setStatus('authStatus','Akun berhasil login, tetapi belum memiliki role Treasury.');await sb.auth.signOut();currentUser=null;isSuperadmin=false;isViewer=false;updateAccess();return}
-  updateAccess();setStatus('authStatus',isViewer?'Login perangkat kelas berhasil. Mode hanya lihat dan unduh aktif.':'Login berhasil. Hak pengelolaan Admin aktif.');
+  if(!isEditor&&!isViewer){setStatus('authStatus','Akun berhasil login, tetapi belum memiliki role Treasury.');await sb.auth.signOut({scope:'local'});currentUser=null;isSuperadmin=false;isViewer=false;updateAccess();return}
+  await registerTreasurySession();
+  updateAccess();setStatus('authStatus',isViewer?'Login perangkat kelas berhasil. Sesi berlaku maksimal 12 jam.':'Login berhasil. Sesi berlaku maksimal 12 jam.');
   $('loginBox').classList.remove('open');
   await loadState();const weeksChanged=ensureUpcomingWeeks();const idsChanged=ensureTransactionIds();if(weeksChanged||idsChanged)await persist();else render();
  }catch(e){setStatus('authStatus','Gagal memuat akses bendahara: '+(e?.message||String(e)))}
@@ -610,7 +647,7 @@ function watchSavedPassword(){
 $('loginToggle').onclick=()=>{ $('loginBox').classList.toggle('open');if($('loginBox').classList.contains('open'))watchSavedPassword();else if(autofillWatcher){clearInterval(autofillWatcher);autofillWatcher=null;} };
 $('cancelLogin').onclick=()=>{$('loginBox').classList.remove('open');if(autofillWatcher){clearInterval(autofillWatcher);autofillWatcher=null;}};
 $('loginBtn').onclick=performLogin;
-$('logoutBtn').onclick=async()=>{await sb.auth.signOut();currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;isViewer=false;updateAccess();setStatus('authStatus','Kamu sudah keluar.')};
+$('logoutBtn').onclick=async()=>{stopSessionGuard();await sb.auth.signOut({scope:'local'});currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;isViewer=false;updateAccess();setStatus('authStatus','Kamu sudah keluar dari perangkat ini.')};
 $('submitTransfer').onclick=async()=>{
  if(isCashier&&!await refreshCashierState())return;
  const amount=Number($('transferAmount').value);
@@ -782,8 +819,8 @@ $('exportJson').onclick=()=>{if(!requireExportAccess())return;download(JSON.stri
 function download(content,name,type){const blob=new Blob(['\ufeff',content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 $('resetData').onclick=async()=>{if(!confirm('Yakin reset semua transaksi, siswa, dan periode? Tindakan ini tidak dapat dibatalkan.'))return;state=structuredClone(DEFAULT);selectedWeek=null;if(await persist())setStatus('adminStatus','Data berhasil direset.')};
 $('txDate').value=today();$('transferDate').value=today();['txSearchQuery','txSearchDate','txSearchType'].forEach(id=>$(id).addEventListener('input',()=>{txPage=1;render()}));$('txPageSize').addEventListener('change',()=>{const v=$('txPageSize').value;txPageSize=v==='all'?'all':Number(v);txPage=1;render()});$('txPrev').addEventListener('click',()=>{if(txPage>1){txPage--;render()}});$('txNext').addEventListener('click',()=>{txPage++;render()});
-sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;isViewer=false;updateAccess()}else if(session?.user){currentUser=session.user;queueMicrotask(async()=>{try{currentUser=session.user;const role=await checkUserRole(currentUser);isSuperadmin=role==='superadmin';isViewer=role==='viewer';isEditor=(role==='admin'||role==='superadmin')&&await checkEditor(currentUser);updateAccess()}catch(e){console.error(e);setStatus('authStatus','Gagal memeriksa izin: '+(e?.message||String(e)))}})}});
-(async()=>{try{setStatus('authStatus','Menghubungkan ke Supabase…');const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session){currentUser=data.session.user;const role=await checkUserRole(currentUser);isSuperadmin=role==='superadmin';isViewer=role==='viewer';isEditor=(role==='admin'||role==='superadmin')&&await checkEditor(currentUser)}await loadState();if(isEditor&&ensureTransactionIds())await persist();updateAccess();if(isEditor)setStatus('authStatus','Hak pengelolaan Admin aktif.');else if(isViewer)setStatus('authStatus','Akses perangkat kelas aktif: hanya lihat dan unduh.')}catch(e){console.error(e);$('connection').textContent='Koneksi gagal';setStatus('authStatus','Gagal memuat: '+(e?.message||String(e)))}})();
+sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){stopSessionGuard();currentUser=null;isEditor=false;isSuperadmin=false;isCashier=false;isViewer=false;updateAccess()}else if(session?.user){currentUser=session.user;queueMicrotask(async()=>{try{currentUser=session.user;const valid=await verifyTreasurySession();if(!valid)return;const role=await checkUserRole(currentUser);isSuperadmin=role==='superadmin';isViewer=role==='viewer';isEditor=(role==='admin'||role==='superadmin')&&await checkEditor(currentUser);updateAccess();startSessionGuard()}catch(e){console.error(e);setStatus('authStatus','Gagal memeriksa izin: '+(e?.message||String(e)))}})}});
+(async()=>{try{setStatus('authStatus','Menghubungkan ke Supabase…');const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session){currentUser=data.session.user;const valid=await verifyTreasurySession();if(valid){const role=await checkUserRole(currentUser);isSuperadmin=role==='superadmin';isViewer=role==='viewer';isEditor=(role==='admin'||role==='superadmin')&&await checkEditor(currentUser);startSessionGuard()}}await loadState();if(isEditor&&ensureTransactionIds())await persist();updateAccess();if(isEditor)setStatus('authStatus','Hak pengelolaan Admin aktif. Sesi maksimal 12 jam.');else if(isViewer)setStatus('authStatus','Akses perangkat kelas aktif: hanya lihat dan unduh. Sesi maksimal 12 jam.')}catch(e){console.error(e);$('connection').textContent='Koneksi gagal';setStatus('authStatus','Gagal memuat: '+(e?.message||String(e)))}})();
 </script>
 
 <script>
