@@ -600,6 +600,7 @@ function startSessionGuard(){
  stopSessionGuard();
  sessionGuardTimer=setInterval(()=>{verifyTreasurySession()},TREASURY_SESSION_CHECK_MS);
 }
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&currentUser)verifyTreasurySession()});
 async function registerTreasurySession(){
  const {data,error}=await sb.rpc('treasury_register_session');
  if(error||data!==true)throw error||new Error('Sesi perangkat gagal didaftarkan.');
