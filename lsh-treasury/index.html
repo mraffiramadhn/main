@@ -49,12 +49,12 @@ html[data-theme="dark"] .export-btn{background:#895451;border-color:#A66C68;colo
 <header class="top"><div><div class="eyebrow">Treasury · Financial statement</div><h1>📊 Laporan Saldo Harian</h1><div class="muted">Kas Kelas X-1 · Ringkasan debit, kredit, dan saldo harian</div></div><div class="header-actions"><span class="pill" id="status">Menghubungkan…</span><button class="export-btn" id="exportPdf" type="button" disabled>↓ Ekspor PDF</button><a href="/treasury/">← Kembali ke Treasury</a><button class="theme-toggle" id="themeToggle" type="button" aria-label="Ganti tema" aria-pressed="true"><span id="themeIcon" aria-hidden="true">☀</span></button></div></header>
 <section class="stats">
 <div class="stat"><div class="label">SALDO AKHIR TERBARU</div><div class="value" id="latestBalance">—</div></div>
-<div class="stat"><div class="label">TOTAL KREDIT · PEMASUKAN</div><div class="value credit" id="totalCredit">—</div></div>
-<div class="stat"><div class="label">TOTAL DEBIT · PENGELUARAN</div><div class="value debit" id="totalDebit">—</div></div>
+<div class="stat"><div class="label">TOTAL DEBIT · PEMASUKAN</div><div class="value credit" id="totalCredit">—</div></div>
+<div class="stat"><div class="label">TOTAL KREDIT · PENGELUARAN</div><div class="value debit" id="totalDebit">—</div></div>
 </section>
 <section class="panel"><div><strong>Riwayat saldo harian</strong><div class="muted" style="font-size:12px">Tanggal ditampilkan setelah settlement otomatis pukul 00.00 WIB pada H+1.</div></div>
 <div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Saldo Awal</th><th>Debit</th><th>Kredit</th><th>Saldo Akhir</th></tr></thead><tbody id="rows"><tr><td colspan="5" class="empty">Memuat laporan…</td></tr></tbody></table></div>
-<div class="notice">Debit adalah uang keluar/pengeluaran, sedangkan kredit adalah uang masuk/pemasukan. Transfer antara kas tunai dan rekening tidak dihitung sebagai debit atau kredit karena tidak mengubah saldo gabungan. Hari berjalan belum ditampilkan dan baru tersedia setelah berganti tanggal pukul 00.00 WIB.</div>
+<div class="notice">Debit adalah uang masuk/pemasukan, sedangkan kredit adalah uang keluar/pengeluaran. Transfer antara kas tunai dan rekening tidak dihitung sebagai debit atau kredit karena tidak mengubah saldo gabungan. Hari berjalan belum ditampilkan dan baru tersedia setelah berganti tanggal pukul 00.00 WIB.</div>
 </section>
 <div class="footer">Laporan ini bersumber dari mutasi Treasury. Zona waktu settlement: Asia/Jakarta (WIB).</div>
 </main>
@@ -71,26 +71,26 @@ const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(String(s||''));
 function buildReport(payload){
  const transactions=Array.isArray(payload.transactions)?payload.transactions:[];
  const posted=transactions.filter(t=>safeDate(t.date)&&t.date<dateNow()&&['income','expense','transfer'].includes(t.type));
- const creditAll=posted.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
- const debitAll=posted.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
+ const debitAll=posted.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
+ const creditAll=posted.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
  const currentBalance=Number(payload.cash||0)+Number(payload.bank||0);
  // Reconstruct the opening balance from the latest reconciled Treasury balance and the full ledger movement.
  const allIncome=transactions.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
  const allExpense=transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
  let balance=currentBalance-allIncome+allExpense;
- if(!posted.length)return {rows:[],creditAll,debitAll,currentBalance};
+ if(!posted.length)return {rows:[],debitAll,creditAll,currentBalance};
  const first=posted.map(t=>t.date).sort()[0];
  const end=new Date(dateNow()+'T00:00:00Z');end.setUTCDate(end.getUTCDate()-1);
  const endDate=end.toISOString().slice(0,10);
  const byDate={};
- for(const t of posted){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].credit+=Number(t.amount||0);if(t.type==='expense')byDate[d].debit+=Number(t.amount||0)}
+ for(const t of posted){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].debit+=Number(t.amount||0);if(t.type==='expense')byDate[d].credit+=Number(t.amount||0)}
  const rows=[];
  for(let d=new Date(first+'T00:00:00Z');d<=new Date(endDate+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1)){
   const key=d.toISOString().slice(0,10),opening=balance,day=byDate[key]||{debit:0,credit:0};
-  balance=opening+day.credit-day.debit;
+  balance=opening+day.debit-day.credit;
   rows.push({date:key,opening,debit:day.debit,credit:day.credit,ending:balance});
  }
- return {rows,creditAll,debitAll,currentBalance};
+ return {rows,debitAll,creditAll,currentBalance};
 }
 async function load(){
  try{
@@ -112,7 +112,7 @@ function exportPdf(){
  doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(20,38,60);doc.text('LAPORAN SALDO HARIAN',14,17);
  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(85,100,120);doc.text('Treasury X-1 · Kas Kelas',14,23);doc.text('Periode: '+dateLabel(first)+' – '+dateLabel(last),14,29);doc.text('Diekspor: '+new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})+' WIB',14,35);
  doc.autoTable({startY:42,head:[['Tanggal','Saldo Awal','Debit','Kredit','Saldo Akhir']],body:rows.map(r=>[dateLabel(r.date),fmt(r.opening),r.debit?fmt(r.debit):'—',r.credit?fmt(r.credit):'—',fmt(r.ending)]),theme:'grid',styles:{font:'helvetica',fontSize:8,cellPadding:2.5,textColor:[35,48,65]},headStyles:{fillColor:[20,43,65],textColor:[255,255,255]},alternateRowStyles:{fillColor:[245,248,251]},margin:{left:14,right:14}});
- let y=doc.lastAutoTable.finalY+9;if(y>180){doc.addPage();y=18}doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(35,48,65);doc.text('Total Kredit: '+fmt(latestReport.creditAll),14,y);doc.text('Total Debit: '+fmt(latestReport.debitAll),100,y);
+ let y=doc.lastAutoTable.finalY+9;if(y>180){doc.addPage();y=18}doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(35,48,65);doc.text('Total Debit (Pemasukan): '+fmt(latestReport.debitAll),14,y);doc.text('Total Kredit (Pengeluaran): '+fmt(latestReport.creditAll),100,y);
  const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFontSize(8);doc.setTextColor(130,140,150);doc.text('Halaman '+p+' dari '+pages,283,202,{align:'right'})}
  doc.save('LSH-Treasury-X1-'+last+'.pdf');
 }
