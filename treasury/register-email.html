@@ -38,6 +38,7 @@
    try{
     const {data,error}=await client.rpc('treasury_student_register_notification_contact',{p_student_id:id,p_student_name:name,p_email:email,p_consent:consent});
     if(error)throw error;
+    if(data?.ok===false){setStatus(data.message||'Pendaftaran tidak dapat diproses.','error');button.disabled=false;return}
     setStatus(data?.message||'Pendaftaran berhasil diterima.','success');
     button.textContent='Pendaftaran Diterima';
    }catch(err){setStatus(err?.message||'Pendaftaran gagal. Periksa data lalu coba kembali.','error');button.disabled=false}
