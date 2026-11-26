@@ -92,6 +92,15 @@ function buildReport(payload){
  }
  return {rows,debitAll,creditAll,currentBalance};
 }
+async function authorizeLSH(){
+ const {data:{session},error}=await sb.auth.getSession();
+ if(error||!session){$('status').textContent='Akses dibatasi · Login bendahara/viewer diperlukan.';$('rows').innerHTML='<tr><td colspan="5" class="empty">LSH hanya dapat diakses oleh Admin, Superadmin, atau Viewer. <a href="/treasury/">Kembali ke Treasury dan login.</a></td></tr>';return false}
+ const {data:roleRow,error:roleErr}=await sb.from('treasury_roles').select('role').eq('user_id',session.user.id).maybeSingle();
+ if(roleErr||!roleRow||!['admin','superadmin','viewer'].includes(roleRow.role)){$('status').textContent='Akses ditolak';$('rows').innerHTML='<tr><td colspan="5" class="empty">Role tidak diizinkan. <a href="/treasury/">Kembali ke Treasury.</a></td></tr>';return false}
+ const {data:editor,error:editorErr}=await sb.from('treasury_editors').select('user_id').eq('user_id',session.user.id).maybeSingle();
+ if(roleRow.role!=='viewer'&&(!editor||editorErr)){$('status').textContent='Akses ditolak';$('rows').innerHTML='<tr><td colspan="5" class="empty">Akun tidak terdaftar sebagai editor. <a href="/treasury/">Kembali ke Treasury.</a></td></tr>';return false}
+ return true;
+}
 async function load(){
  try{
   const {data,error}=await sb.from('treasury_state').select('payload,updated_at').eq('id',true).maybeSingle();
@@ -117,7 +126,7 @@ function exportPdf(){
  doc.save('LSH-Treasury-X1-'+last+'.pdf');
 }
 $("exportPdf").addEventListener("click",exportPdf);
-load();
+authorizeLSH().then(ok=>{if(ok)load()});
 </script>
 <script>
 (() => {
