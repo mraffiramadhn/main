@@ -22,7 +22,7 @@
 </div>
 <footer class="muted small">RamaSpace Treasury · Data email private · Admin/editor access only.</footer></main>
 <script>
-if(!window.supabase){document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"><\\/script>')}
+if(!window.supabase){document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"><\/script>')}
 if(!window.supabase){document.getElementById('loginStatus').textContent='SDK Supabase tidak tersedia. CDN gagal dimuat.';throw new Error('Supabase SDK unavailable')}
 const URL='https://ynrdhuhykzsuxsbauvkd.supabase.co',KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA',sb=window.supabase.createClient(URL,KEY);
 const $=id=>document.getElementById(id);let user=null,roster=[],contacts=[],queue=[],isEditor=false,role=null,guardTimer=null;
