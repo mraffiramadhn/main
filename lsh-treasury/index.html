@@ -52,9 +52,9 @@ html[data-theme="dark"] .export-btn{background:#895451;border-color:#A66C68;colo
 <div class="stat"><div class="label">TOTAL DEBIT · PEMASUKAN</div><div class="value debit" id="totalDebit">—</div></div>
 <div class="stat"><div class="label">TOTAL KREDIT · PENGELUARAN</div><div class="value credit" id="totalCredit">—</div></div>
 </section>
-<section class="panel"><div><strong>Riwayat saldo harian</strong><div class="muted" style="font-size:12px">Hari berjalan ditampilkan sebagai laporan sementara (belum settlement). Hari sebelumnya merupakan laporan settled setelah pukul 00.00 WIB.</div></div>
+<section class="panel"><div><strong>Riwayat saldo harian</strong><div class="muted" style="font-size:12px">Laporan menampilkan data settled sampai hari sebelumnya. Data hari berjalan belum masuk laporan dan baru ditambahkan setelah settlement pukul 00.00 WIB berikutnya.</div></div>
 <div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Saldo Awal</th><th>Debit</th><th>Kredit</th><th>Saldo Akhir</th></tr></thead><tbody id="rows"><tr><td colspan="5" class="empty">Memuat laporan…</td></tr></tbody></table></div>
-<div class="notice">Debit adalah uang masuk/pemasukan, sedangkan kredit adalah uang keluar/pengeluaran. Transfer antara kas tunai dan rekening tidak dihitung sebagai debit atau kredit karena tidak mengubah saldo gabungan. Hari berjalan ditampilkan sebagai laporan sementara dan dapat berubah sampai settlement pukul 00.00 WIB. Hari sebelumnya sudah settled.</div>
+<div class="notice">Debit adalah uang masuk/pemasukan, sedangkan kredit adalah uang keluar/pengeluaran. Transfer antara kas tunai dan rekening tidak dihitung sebagai debit atau kredit karena tidak mengubah saldo gabungan. Data hari berjalan tidak ditampilkan sebelum settlement. Setiap pukul 00.00 WIB, data hari sebelumnya masuk laporan settled.</div>
 </section>
 <div class="footer">Laporan ini bersumber dari mutasi Treasury. Zona waktu settlement: Asia/Jakarta (WIB).</div>
 </main>
@@ -71,6 +71,7 @@ const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(String(s||''));
 function buildReport(payload){
  const transactions=Array.isArray(payload.transactions)?payload.transactions:[];
  const today=dateNow(), yesterday=new Date(today+'T00:00:00Z');yesterday.setUTCDate(yesterday.getUTCDate()-1);
+ // Settlement cutoff: at 00:00 WIB, yesterday is finalized; today's transactions are excluded from the settled report.
  const settledThrough=yesterday.toISOString().slice(0,10);
  const valid=transactions.filter(t=>safeDate(t.date)&&t.date<=today&&['income','expense','transfer'].includes(t.type));
  const settled=valid.filter(t=>t.date<=settledThrough);
@@ -82,13 +83,13 @@ function buildReport(payload){
  const allIncome=sum(valid,'income'),allExpense=sum(valid,'expense');
  let balance=currentBalance-allIncome+allExpense;
  if(!valid.length)return {rows:[],debitAll,creditAll,provisionalDebit,provisionalCredit,currentBalance,settledThrough,today};
- const first=valid.map(t=>t.date).sort()[0],endDate=today,byDate={};
- for(const t of valid){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].debit+=Number(t.amount||0);if(t.type==='expense')byDate[d].credit+=Number(t.amount||0)}
+ const first=settled.map(t=>t.date).sort()[0],endDate=settledThrough,byDate={};
+ for(const t of settled){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].debit+=Number(t.amount||0);if(t.type==='expense')byDate[d].credit+=Number(t.amount||0)}
  const rows=[];
  for(let d=new Date(first+'T00:00:00Z');d<=new Date(endDate+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1)){
   const key=d.toISOString().slice(0,10),opening=balance,day=byDate[key]||{debit:0,credit:0};
   balance=opening+day.debit-day.credit;
-  rows.push({date:key,opening,debit:day.debit,credit:day.credit,ending:balance,provisional:key===today});
+  rows.push({date:key,opening,debit:day.debit,credit:day.credit,ending:balance,provisional:false});
  }
  return {rows,debitAll,creditAll,provisionalDebit,provisionalCredit,currentBalance,settledThrough,today};
 }
@@ -108,7 +109,7 @@ async function load(){
   const report=buildReport(data.payload||{});latestReport=report;$("exportPdf").disabled=!report.rows.length;
   $('latestBalance').textContent=report.rows.length?money(report.rows[report.rows.length-1].ending):'—';
   $('totalDebit').textContent=money(report.debitAll);$('totalCredit').textContent=money(report.creditAll);
-  $('rows').innerHTML=report.rows.length?report.rows.slice().reverse().map(r=>'<tr><td>'+dateLabel(r.date)+(r.provisional?' <strong>(sementara)</strong>':'')+'</td><td>'+money(r.opening)+'</td><td'+(r.debit>0?' class="debit"':'')+'>'+(r.debit>0?money(r.debit):'—')+'</td><td'+(r.credit>0?' class="credit"':'')+'>'+(r.credit>0?money(r.credit):'—')+'</td><td><strong>'+money(r.ending)+'</strong></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada laporan yang selesai settlement.</td></tr>';
+  $('rows').innerHTML=report.rows.length?report.rows.slice().reverse().map(r=>'<tr><td>'+dateLabel(r.date)+(r.provisional?' <strong>(sementara)</strong>':'')+'</td><td>'+money(r.opening)+'</td><td'+(r.debit>0?' class="debit"':'')+'>'+(r.debit>0?money(r.debit):'—')+'</td><td'+(r.credit>0?' class="credit"':'')+'>'+(r.credit>0?money(r.credit):'—')+'</td><td><strong>'+money(r.ending)+'</strong></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada data yang selesai settlement.</td></tr>';
   $('status').textContent='Data diperbarui · '+new Date(data.updated_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
  }catch(e){console.error(e);$('status').textContent='Gagal memuat';$('rows').innerHTML='<tr><td colspan="5" class="empty">'+String(e.message||e)+'</td></tr>'}
 }
