@@ -649,7 +649,7 @@ async function performLogin(){
   await withTimeout(registerTreasurySession(),5000,'Pendaftaran sesi');
   updateAccess();setStatus('authStatus',isViewer?'Login perangkat kelas berhasil. Sesi berlaku maksimal 12 jam.':'Login berhasil. Sesi berlaku maksimal 12 jam.');
   $('loginBox').classList.remove('open');
-  await loadState();const weeksChanged=ensureUpcomingWeeks();const idsChanged=ensureTransactionIds();if(weeksChanged||idsChanged)await persist();else render();
+  const loadedOk=await loadState();if(!loadedOk){setStatus('authStatus','Data Treasury belum berhasil dimuat. Login ditahan; data tidak diubah.');return}const weeksChanged=ensureUpcomingWeeks();const idsChanged=ensureTransactionIds();if(weeksChanged||idsChanged)await persist();else render();
  }catch(e){setStatus('authStatus','Gagal memuat akses bendahara: '+(e?.message||String(e)))}
  finally{loginInProgress=false;button.disabled=false}
 }
