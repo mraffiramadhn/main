@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#0B1220">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 <title>Treasury X1 — Kas Kelas</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;document.write('<script src=https://unpkg.com/@supabase/supabase-js@2><\\/script>')"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;document.getElementById('connection').textContent='CDN Supabase utama gagal; mencoba cadangan…';document.write('<script src=https://unpkg.com/@supabase/supabase-js@2 onerror=\\'document.getElementById(\\\\\\\'connection\\\\\\\').textContent=\\\\\\\'Library Supabase gagal dimuat\\\\\\\'\\'><\\/script>')"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
@@ -525,7 +525,7 @@ html[data-theme="dark"] #txRows .expense{color:#E0B1B4!important}
 <script>
 const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let sb=null;try{if(!window.supabase?.createClient)throw new Error('Library Supabase tidak tersedia');sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)}catch(e){$('connection').textContent='Library Supabase gagal dimuat';setStatus('authStatus','Gagal memulai Treasury: '+e.message);console.error('Supabase SDK initialization failed:',e)}
 const DEFAULT={className:'Kas Kelas X1',cash:0,bank:0,students:[],transactions:[],paymentLogs:[],weeks:[],nextTransactionSequence:1,invoiceSequence:1};
 let state=structuredClone(DEFAULT),currentUser=null,isEditor=false,isSuperadmin=false,isCashier=false,isViewer=false,selectedWeek=null,loaded=false,txPageSize=10,txPage=1;
 const $=id=>document.getElementById(id);
