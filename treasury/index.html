@@ -718,7 +718,7 @@ $('exportPaymentPdf').onclick=()=>{
  doc.text('REKAP KELENGKAPAN KAS '+(state.className||'KELAS X1').toUpperCase(),14,13);
  doc.setFont('helvetica','normal');doc.setFontSize(8);
  const ref=state.weeks[centerIndex]?.label||'';
- doc.text('Minggu acuan: '+ref+'  |  Diekspor: '+new Date().toLocaleDateString('id-ID'),14,19);
+ const exportedAt=new Date(),exportStamp=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(exportedAt).replace(/(\d{2})\/(\d{2})\/(\d{2}),?\s*(\d{2}):(\d{2}):(\d{2})/,'$1/$2/$3 $4:$5:$6');\n doc.text('Minggu acuan: '+ref+'  |  Diekspor: '+exportStamp,14,19);
  doc.autoTable({
   head:[headers],body,
   startY:23,theme:'grid',
@@ -769,7 +769,7 @@ $('exportPdf').onclick=()=>{
  doc.text('LAPORAN MUTASI KAS',14,16);
  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(75,85,99);
  doc.text((state.className||'Kas Kelas X1')+' · Periode '+periodLabel,14,22);
- doc.text('Tanggal ekspor: '+dateLabel(today()),14,27);
+ const exportStamp=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date()).replace(/(\d{2})\/(\d{2})\/(\d{2}),?\s*(\d{2}):(\d{2}):(\d{2})/,'$1/$2/$3 $4:$5:$6');\n doc.text('Diekspor: '+exportStamp,14,27);
 
  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,85,135);
  doc.text('I. Ringkasan Eksekutif Keuangan',14,38);
