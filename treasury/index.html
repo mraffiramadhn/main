@@ -542,7 +542,32 @@ html[data-theme="dark"] #txRows .expense{color:#E0B1B4!important}
 </div></div><div class="footer">Treasury · akses publik hanya untuk melihat. Pengeditan dilindungi login dan kebijakan akses database.</div>
 </main>
 <script>
+/* Independent bootstrap watchdog: runs even if the main Treasury script has a parse error. */
+(()=>{
+ const pill=document.getElementById('connection'),auth=document.getElementById('authStatus');
+ window.addEventListener('error',ev=>{
+  const msg=ev.message||'Script error';
+  if(pill)pill.textContent='Script error: '+msg;
+  if(auth)auth.textContent='Treasury script gagal: '+msg;
+  console.error('Treasury pre-bootstrap error',ev);
+ });
+ window.addEventListener('unhandledrejection',ev=>{
+  const msg=ev.reason?.message||String(ev.reason||'Promise rejection');
+  if(pill)pill.textContent='Promise error: '+msg;
+  if(auth)auth.textContent='Promise gagal: '+msg;
+ });
+ window.__treasuryMainStarted=false;
+ setTimeout(()=>{
+  if(!window.__treasuryMainStarted&&pill&&pill.textContent.includes('SDK Supabase siap')){
+   pill.textContent='SDK siap, tetapi script utama tidak dimulai · kemungkinan JS parse/load error';
+   if(auth)auth.textContent='Bootstrap utama tidak mencapai titik awal. Error global (jika ada) tercatat di status/console.';
+  }
+ },5000);
+})();
+</script>
+<script>
 (async()=>{
+ window.__treasuryMainStarted=true;
  const sdkReady=await window.__treasurySdkReady;
  if(!sdkReady)return;
  const pill=document.getElementById('connection');
