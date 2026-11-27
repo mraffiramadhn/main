@@ -824,7 +824,8 @@ $('exportPdf').onclick=()=>{
  doc.text('LAPORAN MUTASI KAS',14,16);
  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(75,85,99);
  doc.text((state.className||'Kas Kelas X1')+' · Periode '+periodLabel,14,22);
- const nowExport=new Date(),parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(nowExport),part=k=>parts.find(p=>p.type===k)?.value||'',exportStamp=part('day')+'/'+part('month')+'/'+part('year').slice(-2)+' '+part('hour')+':'+part('minute')+':'+part('second');\n doc.text('Diekspor: '+exportStamp,14,27);
+ const nowExport=new Date(),parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(nowExport),part=k=>parts.find(p=>p.type===k)?.value||'',exportStamp=part('day')+'/'+part('month')+'/'+part('year').slice(-2)+' '+part('hour')+':'+part('minute')+':'+part('second');
+  doc.text('Diekspor: '+exportStamp,14,27);
 
  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,85,135);
  doc.text('I. Ringkasan Eksekutif Keuangan',14,38);
