@@ -545,9 +545,15 @@ html[data-theme="dark"] #txRows .expense{color:#E0B1B4!important}
 (async()=>{
  const sdkReady=await window.__treasurySdkReady;
  if(!sdkReady)return;
+ const pill=document.getElementById('connection');
+ const authStatus=document.getElementById('authStatus');
+ window.addEventListener('error',ev=>{if(pill)pill.textContent='JavaScript error: '+(ev.message||'unknown error');if(authStatus)authStatus.textContent='Runtime error Treasury: '+(ev.message||'unknown error');console.error('Treasury global error',ev.error||ev)});
+ window.addEventListener('unhandledrejection',ev=>{const msg=ev.reason?.message||String(ev.reason||'Promise rejection');if(pill)pill.textContent='Promise error: '+msg;if(authStatus)authStatus.textContent='Promise gagal: '+msg;console.error('Treasury unhandled rejection',ev.reason)});
+ if(pill)pill.textContent='SDK berhasil · menginisialisasi client…';
  const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+if(pill)pill.textContent='Client Supabase dibuat · memulai pemeriksaan sesi…';
 const DEFAULT={className:'Kas Kelas X1',cash:0,bank:0,students:[],transactions:[],paymentLogs:[],weeks:[],nextTransactionSequence:1,invoiceSequence:1};
 let state=structuredClone(DEFAULT),currentUser=null,isEditor=false,isSuperadmin=false,isCashier=false,isViewer=false,selectedWeek=null,loaded=false,txPageSize=10,txPage=1;
 const $=id=>document.getElementById(id);
