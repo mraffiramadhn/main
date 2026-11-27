@@ -8,7 +8,9 @@
 <script>
 window.__treasurySdkReady=(async()=>{const pill=document.getElementById('connection');if(pill)pill.textContent='Memuat library koneksi…';const urls=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://unpkg.com/@supabase/supabase-js@2'];for(const url of urls){const loaded=await new Promise(resolve=>{let done=false;const script=document.createElement('script');script.src=url;script.async=true;const finish=value=>{if(done)return;done=true;clearTimeout(timer);script.onload=script.onerror=null;resolve(value)};script.onload=()=>finish(!!window.supabase?.createClient);script.onerror=()=>finish(false);const timer=setTimeout(()=>finish(false),7000);document.head.appendChild(script)});if(loaded)return true}if(pill)pill.textContent='SDK Supabase gagal dimuat';return false})();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script>
+(()=>{setTimeout(()=>{const c=document.getElementById('connection'),a=document.getElementById('authStatus');if(c&&(/Menghubungkan|JS aktif|Memuat library koneksi/i.test(c.textContent))){c.textContent='Bootstrap Treasury macet';if(a)a.textContent='JavaScript Treasury tidak menyelesaikan inisialisasi. Cek Console browser untuk error; tidak ada data yang diubah.'}},20000)})();
+</script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
 .editoronly.editoronly-cell.show,.editoronly.editoronly-header.show{display:table-cell!important}
