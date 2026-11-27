@@ -52,9 +52,9 @@ html[data-theme="dark"] .export-btn{background:#895451;border-color:#A66C68;colo
 <div class="stat"><div class="label">TOTAL DEBIT · PEMASUKAN</div><div class="value debit" id="totalDebit">—</div></div>
 <div class="stat"><div class="label">TOTAL KREDIT · PENGELUARAN</div><div class="value credit" id="totalCredit">—</div></div>
 </section>
-<section class="panel"><div><strong>Riwayat saldo harian</strong><div class="muted" style="font-size:12px">Tanggal ditampilkan setelah settlement otomatis pukul 00.00 WIB pada H+1.</div></div>
+<section class="panel"><div><strong>Riwayat saldo harian</strong><div class="muted" style="font-size:12px">Hari berjalan ditampilkan sebagai laporan sementara (belum settlement). Hari sebelumnya merupakan laporan settled setelah pukul 00.00 WIB.</div></div>
 <div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Saldo Awal</th><th>Debit</th><th>Kredit</th><th>Saldo Akhir</th></tr></thead><tbody id="rows"><tr><td colspan="5" class="empty">Memuat laporan…</td></tr></tbody></table></div>
-<div class="notice">Debit adalah uang masuk/pemasukan, sedangkan kredit adalah uang keluar/pengeluaran. Transfer antara kas tunai dan rekening tidak dihitung sebagai debit atau kredit karena tidak mengubah saldo gabungan. Hari berjalan belum ditampilkan dan baru tersedia setelah berganti tanggal pukul 00.00 WIB.</div>
+<div class="notice">Debit adalah uang masuk/pemasukan, sedangkan kredit adalah uang keluar/pengeluaran. Transfer antara kas tunai dan rekening tidak dihitung sebagai debit atau kredit karena tidak mengubah saldo gabungan. Hari berjalan ditampilkan sebagai laporan sementara dan dapat berubah sampai settlement pukul 00.00 WIB. Hari sebelumnya sudah settled.</div>
 </section>
 <div class="footer">Laporan ini bersumber dari mutasi Treasury. Zona waktu settlement: Asia/Jakarta (WIB).</div>
 </main>
@@ -70,7 +70,7 @@ const dateLabel=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.
 const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(String(s||''));
 function buildReport(payload){
  const transactions=Array.isArray(payload.transactions)?payload.transactions:[];
- const posted=transactions.filter(t=>safeDate(t.date)&&t.date<dateNow()&&['income','expense','transfer'].includes(t.type));
+ const posted=transactions.filter(t=>safeDate(t.date)&&t.date<=dateNow()&&['income','expense','transfer'].includes(t.type));
  const debitAll=posted.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
  const creditAll=posted.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
  const currentBalance=Number(payload.cash||0)+Number(payload.bank||0);
@@ -80,7 +80,7 @@ function buildReport(payload){
  let balance=currentBalance-allIncome+allExpense;
  if(!posted.length)return {rows:[],debitAll,creditAll,currentBalance};
  const first=posted.map(t=>t.date).sort()[0];
- const end=new Date(dateNow()+'T00:00:00Z');end.setUTCDate(end.getUTCDate()-1);
+ const end=new Date(dateNow()+'T00:00:00Z');
  const endDate=end.toISOString().slice(0,10);
  const byDate={};
  for(const t of posted){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].debit+=Number(t.amount||0);if(t.type==='expense')byDate[d].credit+=Number(t.amount||0)}
