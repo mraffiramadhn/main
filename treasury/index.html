@@ -5,7 +5,9 @@
 <meta name="theme-color" content="#0B1220">
 <link rel="icon" type="image/png" href="/favicon-baru1.png?v=2">
 <title>Treasury X1 — Kas Kelas</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;document.getElementById('connection').textContent='CDN gagal; mencoba fallback Supabase…';this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+<script>
+window.__treasurySdkReady=(async()=>{const pill=document.getElementById('connection');if(pill)pill.textContent='Memuat library koneksi…';const urls=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://unpkg.com/@supabase/supabase-js@2'];for(const url of urls){const loaded=await new Promise(resolve=>{let done=false;const script=document.createElement('script');script.src=url;script.async=true;const finish=value=>{if(done)return;done=true;clearTimeout(timer);script.onload=script.onerror=null;resolve(value)};script.onload=()=>finish(!!window.supabase?.createClient);script.onerror=()=>finish(false);const timer=setTimeout(()=>finish(false),7000);document.head.appendChild(script)});if(loaded)return true}if(pill)pill.textContent='SDK Supabase gagal dimuat';return false})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
@@ -523,7 +525,7 @@ html[data-theme="dark"] #txRows .expense{color:#E0B1B4!important}
 </div></div><div class="footer">Treasury · akses publik hanya untuk melihat. Pengeditan dilindungi login dan kebijakan akses database.</div>
 </main>
 <script>
-const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
+(async()=>{const sdkReady=await window.__treasurySdkReady;if(!sdkReady){const auth=document.getElementById('authStatus');if(auth)auth.textContent='CDN Supabase gagal atau timeout pada kedua sumber. Tidak ada data diubah.';return;} const SUPABASE_URL='https://ynrdhuhykzsuxsbauvkd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_zrvPiE6yzvsfmoHt6hEFFg_Qv82LoKA';
 let sb=null;try{if(!window.supabase?.createClient)throw new Error('Library Supabase tidak tersedia');sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)}catch(e){const pill=document.getElementById('connection'),auth=document.getElementById('authStatus');if(pill)pill.textContent='SDK Supabase gagal dimuat';if(auth)auth.textContent='Treasury gagal memulai koneksi: '+(e?.message||String(e));console.error('Supabase SDK initialization failed:',e)}
 const DEFAULT={className:'Kas Kelas X1',cash:0,bank:0,students:[],transactions:[],paymentLogs:[],weeks:[],nextTransactionSequence:1,invoiceSequence:1};
@@ -835,7 +837,7 @@ sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){stopSession
 (async()=>{setStatus('authStatus','Memeriksa sesi (maks. 5 detik)…');let sessionError=null;try{const {data,error}=await withTimeout(sb.auth.getSession(),5000,'Pemeriksaan sesi');if(error)throw error;if(data.session){currentUser=data.session.user;const valid=await withTimeout(verifyTreasurySession(),5000,'Validasi sesi');if(valid){const role=await checkUserRole(currentUser);isSuperadmin=role==='superadmin';isViewer=role==='viewer';isEditor=role==='superadmin'||(role==='admin'&&await checkEditor(currentUser));startSessionGuard()}}}catch(e){sessionError=e;console.warn('Pemeriksaan sesi gagal; lanjut ke pemuatan publik.',e)}try{const ok=await loadState();if(ok&&isEditor&&ensureTransactionIds())await persist();updateAccess();if(!isEditor&&!isSuperadmin&&!isCashier&&!isViewer){setInterval(()=>{if(document.visibilityState==='visible')loadState()},8000);}if(isEditor)setStatus('authStatus','Hak pengelolaan Admin aktif. Sesi maksimal 12 jam.');else if(isViewer)setStatus('authStatus','Akses perangkat kelas aktif: hanya lihat & unduh. Sesi maksimal 12 jam.');else if(sessionError&&loaded)setStatus('authStatus','Mode publik aktif; pemeriksaan sesi bermasalah ('+(sessionError.message||sessionError)+').');}catch(e){console.error('Treasury bootstrap failed:',e);$('connection').textContent='Gagal memuat: '+(e?.message||String(e));setStatus('authStatus','Error pemuatan Treasury: '+(e?.message||String(e)))} })();
 }else{const pill=document.getElementById('connection'),auth=document.getElementById('authStatus');if(pill)pill.textContent='SDK Supabase tidak tersedia';if(auth)auth.textContent='Gagal memuat SDK Supabase. Coba muat ulang; tidak ada data yang diubah.'}
 
-</script>
+})();</script>
 
 <script>
 (() => {
