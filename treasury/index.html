@@ -7,20 +7,21 @@
 <title>Treasury X1 — Kas Kelas</title>
 <script>
 window.__treasurySdkReady=(async()=>{
- const pill=document.getElementById('connection'),auth=document.getElementById('authStatus');
+ const setConnection=msg=>{const el=document.getElementById('connection');if(el)el.textContent=msg};
+ const setAuth=msg=>{const el=document.getElementById('authStatus');if(el)el.textContent=msg};
  const urls=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://unpkg.com/@supabase/supabase-js@2'];
  for(let i=0;i<urls.length;i++){
-  if(pill)pill.textContent=i===0?'Memuat SDK Supabase…':'CDN utama gagal · mencoba cadangan…';
+  setConnection(i===0?'Memuat SDK Supabase…':'CDN utama gagal · mencoba cadangan…');
   const ok=await new Promise(resolve=>{
    let settled=false;const script=document.createElement('script');script.src=urls[i];script.async=true;
    const finish=v=>{if(settled)return;settled=true;clearTimeout(timer);script.onload=null;script.onerror=null;resolve(v)};
    script.onload=()=>finish(!!window.supabase?.createClient);script.onerror=()=>finish(false);
    const timer=setTimeout(()=>finish(false),7000);document.head.appendChild(script);
   });
-  if(ok)return true;
+  if(ok){setConnection('SDK Supabase siap · memulai bootstrap…');return true}
  }
- if(pill)pill.textContent='SDK Supabase gagal dimuat';
- if(auth)auth.textContent='Kedua CDN SDK gagal atau timeout. Treasury tidak dapat memulai koneksi.';
+ setConnection('SDK Supabase gagal dimuat · periksa CDN/koneksi');
+ setAuth('SDK Supabase tidak berhasil dimuat dari kedua CDN. Bootstrap Treasury dihentikan agar tidak menyimpan data kosong.');
  return false;
 })();
 </script>
