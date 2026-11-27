@@ -70,27 +70,27 @@ const dateLabel=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.
 const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(String(s||''));
 function buildReport(payload){
  const transactions=Array.isArray(payload.transactions)?payload.transactions:[];
- const posted=transactions.filter(t=>safeDate(t.date)&&t.date<=dateNow()&&['income','expense','transfer'].includes(t.type));
- const debitAll=posted.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
- const creditAll=posted.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
+ const today=dateNow(), yesterday=new Date(today+'T00:00:00Z');yesterday.setUTCDate(yesterday.getUTCDate()-1);
+ const settledThrough=yesterday.toISOString().slice(0,10);
+ const valid=transactions.filter(t=>safeDate(t.date)&&t.date<=today&&['income','expense','transfer'].includes(t.type));
+ const settled=valid.filter(t=>t.date<=settledThrough);
+ const provisional=valid.filter(t=>t.date===today);
+ const sum=(list,type)=>list.filter(t=>t.type===type).reduce((s,t)=>s+Number(t.amount||0),0);
+ const debitAll=sum(settled,'income'),creditAll=sum(settled,'expense');
+ const provisionalDebit=sum(provisional,'income'),provisionalCredit=sum(provisional,'expense');
  const currentBalance=Number(payload.cash||0)+Number(payload.bank||0);
- // Reconstruct the opening balance from the latest reconciled Treasury balance and the full ledger movement.
- const allIncome=transactions.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
- const allExpense=transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
+ const allIncome=sum(valid,'income'),allExpense=sum(valid,'expense');
  let balance=currentBalance-allIncome+allExpense;
- if(!posted.length)return {rows:[],debitAll,creditAll,currentBalance};
- const first=posted.map(t=>t.date).sort()[0];
- const end=new Date(dateNow()+'T00:00:00Z');
- const endDate=end.toISOString().slice(0,10);
- const byDate={};
- for(const t of posted){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].debit+=Number(t.amount||0);if(t.type==='expense')byDate[d].credit+=Number(t.amount||0)}
+ if(!valid.length)return {rows:[],debitAll,creditAll,provisionalDebit,provisionalCredit,currentBalance,settledThrough,today};
+ const first=valid.map(t=>t.date).sort()[0],endDate=today,byDate={};
+ for(const t of valid){const d=t.date;if(!byDate[d])byDate[d]={debit:0,credit:0};if(t.type==='income')byDate[d].debit+=Number(t.amount||0);if(t.type==='expense')byDate[d].credit+=Number(t.amount||0)}
  const rows=[];
  for(let d=new Date(first+'T00:00:00Z');d<=new Date(endDate+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1)){
   const key=d.toISOString().slice(0,10),opening=balance,day=byDate[key]||{debit:0,credit:0};
   balance=opening+day.debit-day.credit;
-  rows.push({date:key,opening,debit:day.debit,credit:day.credit,ending:balance});
+  rows.push({date:key,opening,debit:day.debit,credit:day.credit,ending:balance,provisional:key===today});
  }
- return {rows,debitAll,creditAll,currentBalance};
+ return {rows,debitAll,creditAll,provisionalDebit,provisionalCredit,currentBalance,settledThrough,today};
 }
 async function authorizeLSH(){
  const {data:{session},error}=await sb.auth.getSession();
@@ -108,7 +108,7 @@ async function load(){
   const report=buildReport(data.payload||{});latestReport=report;$("exportPdf").disabled=!report.rows.length;
   $('latestBalance').textContent=report.rows.length?money(report.rows[report.rows.length-1].ending):'—';
   $('totalDebit').textContent=money(report.debitAll);$('totalCredit').textContent=money(report.creditAll);
-  $('rows').innerHTML=report.rows.length?report.rows.slice().reverse().map(r=>'<tr><td>'+dateLabel(r.date)+'</td><td>'+money(r.opening)+'</td><td'+(r.debit>0?' class="debit"':'')+'>'+(r.debit>0?money(r.debit):'—')+'</td><td'+(r.credit>0?' class="credit"':'')+'>'+(r.credit>0?money(r.credit):'—')+'</td><td><strong>'+money(r.ending)+'</strong></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada laporan yang selesai settlement.</td></tr>';
+  $('rows').innerHTML=report.rows.length?report.rows.slice().reverse().map(r=>'<tr><td>'+dateLabel(r.date)+(r.provisional?' <strong>(sementara)</strong>':'')+'</td><td>'+money(r.opening)+'</td><td'+(r.debit>0?' class="debit"':'')+'>'+(r.debit>0?money(r.debit):'—')+'</td><td'+(r.credit>0?' class="credit"':'')+'>'+(r.credit>0?money(r.credit):'—')+'</td><td><strong>'+money(r.ending)+'</strong></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada laporan yang selesai settlement.</td></tr>';
   $('status').textContent='Data diperbarui · '+new Date(data.updated_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
  }catch(e){console.error(e);$('status').textContent='Gagal memuat';$('rows').innerHTML='<tr><td colspan="5" class="empty">'+String(e.message||e)+'</td></tr>'}
 }
@@ -120,7 +120,7 @@ function exportPdf(){
  const fmt=n=>'Rp '+new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n)||0);
  doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(20,38,60);doc.text('LAPORAN SALDO HARIAN',14,17);
  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(85,100,120);doc.text('Treasury X-1 · Kas Kelas',14,23);doc.text('Periode: '+dateLabel(first)+' – '+dateLabel(last),14,29);doc.text('Diekspor: '+new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})+' WIB',14,35);
- doc.autoTable({startY:42,head:[['Tanggal','Saldo Awal','Debit','Kredit','Saldo Akhir']],body:rows.map(r=>[dateLabel(r.date),fmt(r.opening),r.debit?fmt(r.debit):'—',r.credit?fmt(r.credit):'—',fmt(r.ending)]),theme:'grid',styles:{font:'helvetica',fontSize:8,cellPadding:2.5,textColor:[35,48,65]},headStyles:{fillColor:[20,43,65],textColor:[255,255,255]},alternateRowStyles:{fillColor:[245,248,251]},margin:{left:14,right:14}});
+ doc.autoTable({startY:42,head:[['Tanggal','Saldo Awal','Debit','Kredit','Saldo Akhir']],body:rows.map(r=>[dateLabel(r.date)+(r.provisional?' (SEMENTARA)':''),fmt(r.opening),r.debit?fmt(r.debit):'—',r.credit?fmt(r.credit):'—',fmt(r.ending)]),theme:'grid',styles:{font:'helvetica',fontSize:8,cellPadding:2.5,textColor:[35,48,65]},headStyles:{fillColor:[20,43,65],textColor:[255,255,255]},alternateRowStyles:{fillColor:[245,248,251]},margin:{left:14,right:14}});
  let y=doc.lastAutoTable.finalY+9;if(y>180){doc.addPage();y=18}doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(35,48,65);doc.text('Total Debit (Pemasukan): '+fmt(latestReport.debitAll),14,y);doc.text('Total Kredit (Pengeluaran): '+fmt(latestReport.creditAll),100,y);
  const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFontSize(8);doc.setTextColor(130,140,150);doc.text('Halaman '+p+' dari '+pages,283,202,{align:'right'})}
  doc.save('LSH-Treasury-X1-'+last+'.pdf');
