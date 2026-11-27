@@ -116,7 +116,7 @@ async function load(){
 function exportPdf(){
  if(!latestReport||!latestReport.rows.length){alert('Belum ada data LSH yang dapat diekspor.');return}
  if(!window.jspdf||!window.jspdf.jsPDF){alert('Komponen PDF belum termuat. Muat ulang halaman.');return}
- const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+ const doc=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
  const rows=latestReport.rows.slice().reverse(),first=rows[rows.length-1].date,last=rows[0].date;
  const fmt=n=>'Rp '+new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n)||0);
  doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(20,38,60);doc.text('LAPORAN SALDO HARIAN',14,17);
