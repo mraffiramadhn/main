@@ -772,7 +772,8 @@ $('exportPaymentPdf').onclick=()=>{
  doc.text('REKAP KELENGKAPAN KAS '+(state.className||'KELAS X1').toUpperCase(),14,13);
  doc.setFont('helvetica','normal');doc.setFontSize(8);
  const ref=state.weeks[centerIndex]?.label||'';
- const exportedAt=new Date(),parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(exportedAt),part=k=>parts.find(p=>p.type===k)?.value||'',exportStamp=part('day')+'/'+part('month')+'/'+part('year').slice(-2)+' '+part('hour')+':'+part('minute')+':'+part('second');\n doc.text('Minggu acuan: '+ref+'  |  Diekspor: '+exportStamp,14,19);
+ const exportedAt=new Date(),parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(exportedAt),part=k=>parts.find(p=>p.type===k)?.value||'',exportStamp=part('day')+'/'+part('month')+'/'+part('year').slice(-2)+' '+part('hour')+':'+part('minute')+':'+part('second');
+  doc.text('Minggu acuan: '+ref+'  |  Diekspor: '+exportStamp,14,19);
  doc.autoTable({
   head:[headers],body,
   startY:23,theme:'grid',
