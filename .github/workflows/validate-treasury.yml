@@ -19,7 +19,7 @@ jobs:
           from pathlib import Path
           import re
           html=Path('treasury/index.html').read_text()
-          scripts=re.findall(r'<script\\b[^>]*>(.*?)</script>', html, flags=re.I|re.S)
+          scripts=re.findall(r'<script\b[^>]*>(.*?)</script>', html, flags=re.I|re.S)
           Path('/tmp/treasury-inline-scripts').mkdir(exist_ok=True)
           for i,script in enumerate(scripts):
               Path(f'/tmp/treasury-inline-scripts/script-{i}.js').write_text(script)
